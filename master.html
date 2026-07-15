@@ -15,8 +15,36 @@
   .panel{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px;margin-bottom:14px}
   .panel h2{font-size:15px;margin:0 0 10px;display:flex;align-items:center;gap:8px}
   .step{background:var(--accent);color:#fff;font-size:12px;font-weight:800;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 22px}
-  .cat{font-size:11.5px;font-weight:800;color:var(--accent);margin:12px 0 5px;letter-spacing:.03em}
-  .cat:first-of-type{margin-top:0}
+  /* 분야별 접기/펴기 */
+  details.shcat{border-top:1px solid var(--line)}
+  details.shcat:first-of-type{border-top:0}
+  details.shcat summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:8px;
+    padding:10px 4px;font-size:12.5px;font-weight:800;color:var(--accent);letter-spacing:.03em}
+  details.shcat summary::-webkit-details-marker{display:none}
+  details.shcat summary:hover{color:var(--tx)}
+  .chev{font-size:11px;transition:transform .18s;display:inline-block}
+  details.shcat[open] .chev{transform:rotate(90deg)}
+  .ccount{margin-left:auto;font-size:11px;font-weight:600;color:var(--dim);
+    background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+  .ccount.has{color:var(--ok);border-color:var(--ok)}
+  .citems{padding-bottom:6px}
+  details.shcat:not([open]) > .citems{display:none}
+
+  /* 검색 */
+  .search{position:relative;margin-bottom:10px}
+  .search input{width:100%;padding:10px 32px 10px 34px;border:1px solid var(--line);border-radius:9px;
+    background:var(--card2);color:var(--tx);font-size:13.5px;font-family:inherit}
+  .search input:focus{outline:none;border-color:var(--accent)}
+  .search .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:13px}
+  .search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;
+    color:var(--dim);cursor:pointer;font-size:15px;padding:2px 6px;display:none}
+  .nohit{color:var(--dim);font-size:13px;padding:14px 4px;display:none}
+
+  /* 2번 칸 옵션 (도구 목록의 .item 과 분리 — 검색에 안 걸리게) */
+  .optrow{display:flex;align-items:flex-start;gap:9px;margin-top:12px;padding:9px 10px;
+    border:1px solid var(--line);border-radius:8px;cursor:pointer;font-size:13.5px}
+  .optrow input{width:16px;height:16px;accent-color:var(--accent);flex:0 0 16px;margin-top:2px}
+
   .item{display:flex;align-items:center;gap:9px;padding:6px 8px;border-radius:7px;cursor:pointer;font-size:13.5px}
   .item:hover{background:var(--card2)}
   .item input{width:16px;height:16px;accent-color:var(--accent);flex:0 0 16px}
@@ -45,12 +73,20 @@
 
   <div class="panel">
     <h2><span class="step">1</span>보낼 도구 고르기</h2>
+    <div class="search">
+      <span class="ico">🔎</span>
+      <input id="q" type="text" placeholder="도구 검색 (이름·설명·분야)">
+      <button class="clr" id="qclr" title="지우기">✕</button>
+    </div>
     <div class="row">
       <button id="selAll">전체 선택</button>
       <button id="selNone">전체 해제</button>
       <button id="selRc">결과수집 되는 것만</button>
+      <button id="expAll">분야 모두 펼치기</button>
+      <button id="colAll">모두 접기</button>
     </div>
     <div id="list"></div>
+    <div class="nohit" id="nohit">검색 결과가 없어요.</div>
   </div>
 
   <div class="panel">
@@ -63,9 +99,9 @@
     <p class="hint">👩‍🎓 <b>학생에게 줄 때</b>: 넣으면 각 도구 링크에 자동으로 붙어 결과가 <b>내 시트</b>로 와요.<br>
        🧑‍🏫 <b>다른 선생님께 줄 때</b>: 비워두고 아래를 켜세요.</p>
 
-    <label class="item" style="margin-top:12px;padding:9px 10px;border:1px solid var(--line);border-radius:8px">
+    <label class="optrow">
       <input id="allowRc" type="checkbox" checked>
-      <span class="nm"><b>받는 사람이 자기 구글시트를 연결할 수 있게</b><br>
+      <span><b>받는 사람이 자기 구글시트를 연결할 수 있게</b><br>
         <span style="color:var(--dim);font-size:12px">켜면 파일 안에 "내 시트 연결" 버튼이 생겨서, 다른 선생님이 자기 exec 주소를 넣고 자기 시트로 결과를 받아요.</span></span>
     </label>
   </div>
@@ -123,10 +159,12 @@ TOOLS.forEach(t => { if(t.cat && !cats.includes(t.cat)) cats.push(t.cat); });
 listEl.innerHTML = cats.map(cat => {
   const items = TOOLS.map((t,i)=>({t,i})).filter(o => (o.t.cat||"기타")===cat);
   if(!items.length) return "";
-  return `<div class="cat">${esc(cat)}</div>` + items.map(o =>
+  return `<details class="shcat" open>
+    <summary><span class="chev">▸</span>${esc(cat)}<span class="ccount">0 / ${items.length}</span></summary>
+    <div class="citems">` + items.map(o =>
     `<label class="item"><input type="checkbox" data-i="${o.i}">
       <span class="nm">${esc(o.t.emoji||"🔗")} ${esc(o.t.name)}</span>
-      ${o.t.rc?'<span class="rcbadge">결과수집</span>':''}</label>`).join("");
+      ${o.t.rc?'<span class="rcbadge">결과수집</span>':''}</label>`).join("") + `</div></details>`;
 }).join("");
 
 const boxes = [...listEl.querySelectorAll("input")];
@@ -134,16 +172,71 @@ const countEl = document.getElementById("count");
 const exportBtn = document.getElementById("exportBtn");
 const previewBtn = document.getElementById("previewBtn");
 
+const sections = [...listEl.querySelectorAll("details.shcat")];
+
 function picked(){ return boxes.filter(b=>b.checked).map(b => TOOLS[+b.dataset.i]); }
+
+/* 분야별 선택 개수 갱신 */
+function refreshCounts(){
+  sections.forEach(det => {
+    const items = [...det.querySelectorAll(".item")];
+    const vis   = items.filter(it => it.style.display !== "none");
+    const sel   = vis.filter(it => it.querySelector("input").checked).length;
+    const cc = det.querySelector(".ccount");
+    cc.textContent = `${sel} / ${vis.length}`;
+    cc.className = "ccount" + (sel ? " has" : "");
+  });
+}
 function refresh(){
   const n = picked().length;
   countEl.innerHTML = `선택한 도구: <b>${n}</b>개`;
   exportBtn.disabled = previewBtn.disabled = (n===0);
+  refreshCounts();
 }
 boxes.forEach(b => b.addEventListener("change", refresh));
-document.getElementById("selAll").onclick  = ()=>{ boxes.forEach(b=>b.checked=true); refresh(); };
-document.getElementById("selNone").onclick = ()=>{ boxes.forEach(b=>b.checked=false); refresh(); };
-document.getElementById("selRc").onclick   = ()=>{ boxes.forEach(b=>b.checked=!!TOOLS[+b.dataset.i].rc); refresh(); };
+
+/* 선택 버튼 — 검색 중이면 '보이는 것'에만 적용 */
+function visibleBoxes(){
+  return boxes.filter(b => b.closest(".item").style.display !== "none"
+                        && b.closest("details.shcat").style.display !== "none");
+}
+document.getElementById("selAll").onclick  = ()=>{ visibleBoxes().forEach(b=>b.checked=true); refresh(); };
+document.getElementById("selNone").onclick = ()=>{ visibleBoxes().forEach(b=>b.checked=false); refresh(); };
+document.getElementById("selRc").onclick   = ()=>{ visibleBoxes().forEach(b=>b.checked=!!TOOLS[+b.dataset.i].rc); refresh(); };
+document.getElementById("expAll").onclick  = ()=>{ sections.forEach(d=>d.open=true); };
+document.getElementById("colAll").onclick  = ()=>{ sections.forEach(d=>d.open=false); };
+
+/* 검색 — DOM을 다시 그리지 않고 숨김 처리 (체크 상태 유지) */
+const qEl = document.getElementById("q");
+const qClr = document.getElementById("qclr");
+const noHit = document.getElementById("nohit");
+function applySearch(){
+  const q = qEl.value.trim().toLowerCase();
+  qClr.style.display = q ? "block" : "none";
+  // 검색 중엔 선택 버튼이 '보이는 것'에만 적용되므로 라벨로 분명히 알림
+  document.getElementById("selAll").textContent  = q ? "검색결과 선택"   : "전체 선택";
+  document.getElementById("selNone").textContent = q ? "검색결과 해제"   : "전체 해제";
+  document.getElementById("selRc").textContent   = q ? "결과수집만(검색결과)" : "결과수집 되는 것만";
+  let total = 0;
+  sections.forEach(det => {
+    let vis = 0;
+    det.querySelectorAll(".item").forEach(it => {
+      const t = TOOLS[+it.querySelector("input").dataset.i];
+      const hay = ((t.name||"") + " " + (t.desc||"") + " " + (t.cat||"")).toLowerCase();
+      const show = !q || hay.indexOf(q) > -1;
+      it.style.display = show ? "" : "none";
+      if(show) vis++;
+    });
+    det.style.display = vis ? "" : "none";
+    if(q && vis) det.open = true;          // 검색 중엔 자동 펼침
+    total += vis;
+  });
+  noHit.style.display = total ? "none" : "block";
+  refreshCounts();
+}
+qEl.addEventListener("input", applySearch);
+qClr.onclick = ()=>{ qEl.value=""; applySearch(); qEl.focus(); };
+
 refresh();
 
 /* ── 공유용 HTML 생성 (고른 도구만 담긴 독립 파일) ── */
