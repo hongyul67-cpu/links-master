@@ -15,8 +15,15 @@
   4) 그 파일을 카톡/메일로 보내거나, 새 저장소에 올려 배포
 
 ■ 중요
-  · 이 폴더(master.html)는 GitHub에 올리지 마세요. 올리면 전체 목록이 공개됩니다.
+  · 이 저장소는 GitHub "비공개(private)" 입니다. Pages 배포도 하지 않습니다.
+    → 절대 public 으로 바꾸거나 Pages 를 켜지 마세요. (켜면 전체 목록이 공개됨)
   · 내보낸 공유용 파일에는 "고른 도구만" 들어갑니다 → 전체 목록이 새지 않아요.
+
+■ 백업 / 다른 컴퓨터에서 쓰기
+  저장소: https://github.com/hongyul67-cpu/links-master  (비공개)
+  · 수정했으면 저장:   git add -A ; git commit -m "수정" ; git push
+  · 다른 PC에서 받기:  git clone https://github.com/hongyul67-cpu/links-master.git
+    (또는 GitHub 웹에서 Code ▾ → Download ZIP)
   · 결과수집 주소를 넣으면 각 도구 링크에 자동으로 붙어 결과가 내 시트로 옵니다.
     - 학생에게 줄 때 → 주소 넣기
     - 다른 선생님께 줄 때 → 비워두기 (그분은 링크생성기로 자기 주소를 씀)
