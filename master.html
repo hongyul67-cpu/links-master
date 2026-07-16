@@ -50,6 +50,9 @@
   .item input{width:16px;height:16px;accent-color:var(--accent);flex:0 0 16px}
   .item .nm{flex:1}
   .item .rcbadge{font-size:10.5px;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:0 6px;white-space:nowrap}
+  .item .open{font-size:11.5px;color:var(--accent);border:1px solid var(--line);border-radius:7px;
+    padding:3px 9px;text-decoration:none;white-space:nowrap;background:var(--card2);flex:0 0 auto}
+  .item .open:hover{border-color:var(--accent);background:var(--accent);color:#fff}
   .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .row button{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:12.5px;cursor:pointer;font-family:inherit}
   label.fld{display:block;font-size:12.5px;font-weight:700;margin:12px 0 5px}
@@ -75,7 +78,7 @@
 <body>
 <div class="wrap">
   <h1>🗝️ 링크모음 마스터</h1>
-  <p class="sub">전체 도구 목록이 담긴 <b>나만 보는 파일</b>이에요. 여기서 필요한 것만 골라 <b>공유용 파일</b>을 만들어 보냅니다.</p>
+  <p class="sub">전체 도구 목록이 담긴 <b>나만 보는 파일</b>이에요. 여기서 필요한 것만 골라 <b>공유용 파일</b>을 만들어 보냅니다.<br>각 도구 오른쪽의 <b>열기 ↗</b>를 누르면 그 프로그램이 새 탭에서 바로 열려요.</p>
   <div class="warnbox">⚠️ 이 파일은 <b>GitHub에 올리지 마세요.</b> 내보낸 공유용 파일에는 <b>고른 도구만</b> 들어가서 전체 목록이 새지 않아요.</div>
 
   <div class="panel">
@@ -161,6 +164,7 @@ const TOOLS = [
   { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"자동화설비 · 기계", type:"개념", rc:true },
   { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 (SolidWorks 입문 전)", repo:"section-view-explorer", cat:"자동화설비 · 기계", type:"개념" },
   { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true },
+  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true },
 
   { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true },
 
@@ -185,6 +189,9 @@ const TOOLS = [
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
+/* 도구의 실제 주소 (repo → GitHub Pages, 또는 url 직접) — 마스터에서 바로 열기용 */
+function toolUrl(t){ return t.url || ("https://" + GH_USER + ".github.io/" + t.repo + "/"); }
+
 /* ── 체크박스 목록 ── */
 const listEl = document.getElementById("list");
 const cats = CATEGORIES.slice();
@@ -197,7 +204,8 @@ listEl.innerHTML = cats.map(cat => {
     <div class="citems">` + items.map(o =>
     `<label class="item"><input type="checkbox" data-i="${o.i}">
       <span class="nm">${esc(o.t.emoji||"🔗")} ${esc(o.t.name)}</span>
-      ${o.t.rc?'<span class="rcbadge">결과수집</span>':''}</label>`).join("") + `</div></details>`;
+      ${o.t.rc?'<span class="rcbadge">결과수집</span>':''}
+      <a class="open" href="${esc(toolUrl(o.t))}" target="_blank" rel="noopener" title="이 도구를 새 탭에서 바로 열기">열기 ↗</a></label>`).join("") + `</div></details>`;
 }).join("");
 
 const boxes = [...listEl.querySelectorAll("input")];
