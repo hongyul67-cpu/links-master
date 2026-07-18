@@ -150,7 +150,7 @@
 const GH_USER = "hongyul67-cpu";
 const VIEWER  = "https://hongyul67-cpu.github.io/links/s.html";   // 공유 모음 뷰어(공개 저장소)
 
-const CATEGORIES = ["자동화설비 · 기계","3D프린터운용기능사","전기기능사","컴퓨터활용능력 1급","기초학력 (국·영·수)","교사 업무 도구"];
+const CATEGORIES = ["전공 · 자동화설비 · 기계","전공 · 3D프린터운용기능사","전공 · 전기기능사","전공 · 컴퓨터활용능력 1급","인문 · 기초학습","교사 도우미 (수업 · 행정)","학급 관리"];
 const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
 
 /* ══════════════════════════════════════════════════════════
@@ -158,34 +158,34 @@ const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
    rc:true = 결과수집(선생님께 제출) 되는 도구
    ══════════════════════════════════════════════════════════ */
 const TOOLS = [
-  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비 · 기계", type:"게임", rc:true },
-  { emoji:"🧩", name:"블록 뷰 매칭", desc:"정투상도(투상도) 연습 게임", repo:"block-view-matching", cat:"자동화설비 · 기계", type:"게임", rc:true },
-  { emoji:"🔍", name:"도면읽기 마스터", desc:"선의 종류 · 치수 읽기 · 기계요소 약도 + 종합시험", repo:"domyeon-master", cat:"자동화설비 · 기계", type:"개념", rc:true },
-  { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"자동화설비 · 기계", type:"개념", rc:true },
-  { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 (SolidWorks 입문 전)", repo:"section-view-explorer", cat:"자동화설비 · 기계", type:"개념" },
-  { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true },
-  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true },
+  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"전공 · 자동화설비 · 기계", type:"게임", rc:true },
+  { emoji:"🧩", name:"블록 뷰 매칭", desc:"정투상도(투상도) 연습 게임", repo:"block-view-matching", cat:"전공 · 자동화설비 · 기계", type:"게임", rc:true },
+  { emoji:"🔍", name:"도면읽기 마스터", desc:"선의 종류 · 치수 읽기 · 기계요소 약도 + 종합시험", repo:"domyeon-master", cat:"전공 · 자동화설비 · 기계", type:"개념", rc:true },
+  { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"전공 · 자동화설비 · 기계", type:"개념", rc:true },
+  { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 (SolidWorks 입문 전)", repo:"section-view-explorer", cat:"전공 · 자동화설비 · 기계", type:"개념" },
+  { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"전공 · 자동화설비 · 기계", type:"문제풀이", rc:true },
+  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"전공 · 자동화설비 · 기계", type:"문제풀이", rc:true },
 
-  { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true },
+  { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"전공 · 3D프린터운용기능사", type:"문제풀이", rc:true },
 
-  { emoji:"⚡", name:"전기기능사 필기 CBT", desc:"24회차 1,440문항 · CBT모의고사 · 유형별 랜덤 · 약점 집중 · 오답노트", repo:"electrician-written-exam", cat:"전기기능사", type:"문제풀이", rc:true },
+  { emoji:"⚡", name:"전기기능사 필기 CBT", desc:"24회차 1,440문항 · CBT모의고사 · 유형별 랜덤 · 약점 집중 · 오답노트", repo:"electrician-written-exam", cat:"전공 · 전기기능사", type:"문제풀이", rc:true },
 
-  { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"컴퓨터활용능력 1급", type:"게임", rc:true },
-  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"실전 60문항 모의고사 · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true },
-  { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·배열수식 등)", repo:"comhwal-excel", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true },
-  { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·집계 등)", repo:"comhwal-access", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true },
+  { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"전공 · 컴퓨터활용능력 1급", type:"게임", rc:true },
+  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"실전 60문항 모의고사 · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"전공 · 컴퓨터활용능력 1급", type:"문제풀이", rc:true },
+  { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·배열수식 등)", repo:"comhwal-excel", cat:"전공 · 컴퓨터활용능력 1급", type:"문제풀이", rc:true },
+  { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·집계 등)", repo:"comhwal-access", cat:"전공 · 컴퓨터활용능력 1급", type:"문제풀이", rc:true },
 
-  { emoji:"📊", name:"기초학력 진단 도구", desc:"중학생 국·영·수 60문항 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"기초학력 (국·영·수)", type:"문제풀이", rc:true },
+  { emoji:"📊", name:"기초학력 진단 도구", desc:"중학생 국·영·수 60문항 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"인문 · 기초학습", type:"문제풀이", rc:true },
 
-  { emoji:"✍️", name:"생기부 문장 생성기", desc:"행동특성 · 세부능력특기사항 문장 생성", repo:"saenggibu-generator", cat:"교사 업무 도구" },
-  { emoji:"🤖", name:"실습과제 도구 모음", desc:"과제 양식 만들기 · 과제 목록 · 채점(교사용) · 제출 도구", repo:"ai-task-tools", cat:"교사 업무 도구" },
-  { emoji:"💬", name:"상담 일지 도구", desc:"상담 내용 기록 · 관리", repo:"counseling", cat:"교사 업무 도구" },
-  { emoji:"🏫", name:"사회생활 수업 학습 도구", desc:"사회생활 수업용 학습 도구 모음", repo:"social-life-tools", cat:"교사 업무 도구" },
-  { emoji:"📅", name:"방학 시간표 관리", desc:"방학 계획 · 시간표 관리 웹앱", repo:"vacation-schedule", cat:"교사 업무 도구" },
-  { emoji:"🎱", name:"구슬 낙하 뽑기", desc:"공이 못·서로 부딪히며 떨어져 발표 순서·당번 추첨", repo:"pinball-picker", cat:"교사 업무 도구" },
-  { emoji:"📣", name:"신입생 모집 홍보 관리", desc:"홍보 대상 중학교 우선순위 · 방문(1~6차) 기록·팀 공유 (학교 단위 데이터, 개인정보 없음)", repo:"middle-school-hongbo", cat:"교사 업무 도구" },
-  { emoji:"📥", name:"결과수집 링크 생성기", desc:"학습도구 결과를 내 구글시트로 모으기 · 교사별 공유 링크 자동 생성", url:"https://hongyul67-cpu.github.io/links/link-builder.html", cat:"교사 업무 도구" },
-  { emoji:"📖", name:"결과수집 설정 가이드", desc:"내 구글시트 연결 방법 (교사용, 컴퓨터로 5분)", url:"https://hongyul67-cpu.github.io/links/guide.html", cat:"교사 업무 도구" },
+  { emoji:"✍️", name:"생기부 문장 생성기", desc:"행동특성 · 세부능력특기사항 문장 생성", repo:"saenggibu-generator", cat:"교사 도우미 (수업 · 행정)" },
+  { emoji:"🤖", name:"실습과제 도구 모음", desc:"과제 양식 만들기 · 과제 목록 · 채점(교사용) · 제출 도구", repo:"ai-task-tools", cat:"교사 도우미 (수업 · 행정)" },
+  { emoji:"💬", name:"상담 일지 도구", desc:"상담 내용 기록 · 관리", repo:"counseling", cat:"학급 관리" },
+  { emoji:"🏫", name:"사회생활 수업 학습 도구", desc:"사회생활 수업용 학습 도구 모음", repo:"social-life-tools", cat:"인문 · 기초학습" },
+  { emoji:"📅", name:"방학 시간표 관리", desc:"방학 계획 · 시간표 관리 웹앱", repo:"vacation-schedule", cat:"학급 관리" },
+  { emoji:"🎱", name:"구슬 낙하 뽑기", desc:"공이 못·서로 부딪히며 떨어져 발표 순서·당번 추첨", repo:"pinball-picker", cat:"학급 관리" },
+  { emoji:"📣", name:"신입생 모집 홍보 관리", desc:"홍보 대상 중학교 우선순위 · 방문(1~6차) 기록·팀 공유 (학교 단위 데이터, 개인정보 없음)", repo:"middle-school-hongbo", cat:"교사 도우미 (수업 · 행정)" },
+  { emoji:"📥", name:"결과수집 링크 생성기", desc:"학습도구 결과를 내 구글시트로 모으기 · 교사별 공유 링크 자동 생성", url:"https://hongyul67-cpu.github.io/links/link-builder.html", cat:"교사 도우미 (수업 · 행정)" },
+  { emoji:"📖", name:"결과수집 설정 가이드", desc:"내 구글시트 연결 방법 (교사용, 컴퓨터로 5분)", url:"https://hongyul67-cpu.github.io/links/guide.html", cat:"교사 도우미 (수업 · 행정)" },
 
   /* ── 내부·관리용 (학생·타 교사에게 공유하지 않는 도구) ──
      이 분류는 CATEGORIES 상수에 없어서, 여기서 골라 담지 않는 한 공유 파일엔 분류 자체가 안 들어갑니다. */
