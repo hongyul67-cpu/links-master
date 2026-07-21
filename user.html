@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>학습 도구 모음</title>
+<!--
+  유저(학생) 뷰어  ─  마스터 → admin → user 3단 구조의 맨 아래
+  ─────────────────────────────────────────────────────────
+  주소(?d=)에 담긴 도구 목록만 보여줍니다. 전체 도구 목록은 이 파일에 없습니다.
+  결과수집 주소(r=)가 담겨 있으면 각 도구 링크에 ?rc= 로 붙어 그 선생님 시트로 결과가 갑니다.
+  이 링크는 "admin.html"(선생님 설정 페이지)에서 자동으로 만들어집니다.
+
+  ⛔ ?d= 데이터 형식(필드 순서/이름)은 s.html 과 동일합니다. 바꾸지 마세요 → 예전 링크가 깨집니다.
+-->
+<style>
+  :root{--bg:#0f1420;--card:#1a2130;--card2:#222c40;--line:#2c3852;--tx:#eef2fb;--dim:#9aa7c2;
+        --accent:#5b8cff;--game:#38d39f;--concept:#5b8cff;--quiz:#f0a742}
+  @media (prefers-color-scheme: light){:root{--bg:#f3f5fb;--card:#fff;--card2:#f7f9ff;--line:#e3e8f4;
+        --tx:#1a2233;--dim:#5c6a86;--accent:#3565e6;--game:#12a97a;--concept:#3565e6;--quiz:#d98518}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--tx);font-family:"Pretendard","Segoe UI",system-ui,sans-serif;line-height:1.5}
+  .wrap{max-width:920px;margin:0 auto;padding:28px 18px 60px}
+  h1{font-size:26px;margin:0 0 6px;letter-spacing:-.02em}
+  .sub{color:var(--dim);font-size:14px}
+  details.section{margin:14px 0 0;border-top:1px solid var(--line)}
+  details.section:first-of-type{border-top:0}
+  summary.cat{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:14px 2px 12px;
+    font-size:15px;font-weight:800;color:var(--tx)}
+  summary.cat::-webkit-details-marker{display:none}
+  .chev{color:var(--accent);font-size:13px;transition:transform .18s;display:inline-block}
+  details[open] .chev{transform:rotate(90deg)}
+  .count{margin-left:auto;font-size:12px;font-weight:600;color:var(--dim);background:var(--card);
+    border:1px solid var(--line);border-radius:999px;padding:1px 9px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;padding:2px 0 6px}
+  details.section:not([open]) > .grid{display:none}
+  a.card{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:15px 16px;transition:.12s}
+  a.card:hover{transform:translateY(-2px);border-color:var(--accent);background:var(--card2)}
+  .name{font-size:16px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .emoji{font-size:18px}
+  .desc{color:var(--dim);font-size:13px;margin:0}
+  .meta{display:flex;align-items:center;gap:8px;margin-top:10px}
+  .tag{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px}
+  .tag.t-game{color:var(--game);background:color-mix(in srgb,var(--game) 15%,transparent)}
+  .tag.t-concept{color:var(--concept);background:color-mix(in srgb,var(--concept) 15%,transparent)}
+  .tag.t-quiz{color:var(--quiz);background:color-mix(in srgb,var(--quiz) 15%,transparent)}
+  .submitbar{background:color-mix(in srgb,var(--game) 12%,transparent);border:1px solid var(--game);
+    border-radius:12px;padding:11px 14px;margin:16px 0 4px;font-size:13.5px;color:var(--tx)}
+  footer{margin-top:34px;color:var(--dim);font-size:12px;text-align:center}
+  .bad{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:20px;color:var(--dim);font-size:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><h1 id="ttl">학습 도구 모음</h1><div class="sub" id="sub"></div></header>
+  <div id="rcnote"></div>
+  <div id="app"></div>
+  <footer id="ft"></footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
+<script>
+var GH_USER="hongyul67-cpu";
+var TYPE_ORDER={"게임":0,"개념":1,"문제풀이":2};
+var TYPE_CLASS={"게임":"t-game","개념":"t-concept","문제풀이":"t-quiz"};
+
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+function qp(n){try{return new URLSearchParams(location.search).get(n);}catch(e){return null;}}
+function rank(t){return (t.type&&t.type in TYPE_ORDER)?TYPE_ORDER[t.type]:99;}
+
+/* 주소(?d=)에서 모음 데이터 복원 — s.html 과 동일 형식 */
+var DATA=null;
+try{
+  var raw=qp("d");
+  if(raw && window.LZString){
+    var json=LZString.decompressFromEncodedURIComponent(raw);
+    if(json) DATA=JSON.parse(json);
+  }
+}catch(e){ DATA=null; }
+
+var FMT_MAX = 1;
+var VER = (DATA && DATA.v) ? DATA.v : 1;
+
+if(!DATA || !DATA.l || !DATA.l.length){
+  document.getElementById("app").innerHTML =
+    '<div class="bad">😅 도구 목록을 불러오지 못했어요.<br>선생님께 받은 링크가 잘린 것 같아요 — 전체 주소를 다시 받아 주세요.</div>';
+} else if(VER > FMT_MAX){
+  document.getElementById("app").innerHTML =
+    '<div class="bad">🔄 이 링크는 최신 형식이라 아직 열 수 없어요.<br>잠시 후 새로고침하거나, 선생님께 알려 주세요.</div>';
+} else {
+  var TITLE=DATA.t||"학습 도구 모음";
+  var BAKED_RC=DATA.r||"";   // 유저 뷰어는 항상 '박힌 exec' 만 사용 (연결 패널 없음)
+  /* [emoji,name,desc,repo,url,cat,type] — 순서 고정 */
+  var TOOLS=DATA.l.map(function(a){
+    return { emoji:a[0]||"🔗", name:a[1]||"", desc:a[2]||"", repo:a[3]||"", url:a[4]||"", cat:a[5]||"기타", type:a[6]||"" };
+  });
+  var CATEGORIES=DATA.c||[];
+
+  document.title=TITLE;
+  document.getElementById("ttl").textContent=TITLE;
+  document.getElementById("ft").textContent=TITLE;
+  document.getElementById("sub").textContent = BAKED_RC
+    ? "아래 카드를 누르면 도구가 열려요 · 결과는 선생님께 자동 제출됩니다"
+    : "아래 카드를 누르면 도구가 열려요";
+  if(BAKED_RC){
+    document.getElementById("rcnote").innerHTML =
+      '<div class="submitbar">📮 이 도구들의 결과는 <b>선생님 구글시트로 자동 제출</b>돼요. 도구 안의 제출 버튼을 눌러 주세요.</div>';
+  }
+
+  function linkOf(t){
+    var u=t.url||("https://"+GH_USER+".github.io/"+t.repo+"/");
+    if(BAKED_RC&&t.repo)u+=(u.indexOf("?")<0?"?":"&")+"rc="+encodeURIComponent(BAKED_RC);
+    return u;
+  }
+
+  var app=document.getElementById("app");
+  var cats=CATEGORIES.slice();
+  TOOLS.forEach(function(t){ if(t.cat&&cats.indexOf(t.cat)<0)cats.push(t.cat); });
+  cats.forEach(function(cat){
+    var items=TOOLS.map(function(t,i){return {t:t,i:i};}).filter(function(o){return (o.t.cat||"기타")===cat;})
+      .sort(function(a,b){return (rank(a.t)-rank(b.t))||(a.i-b.i);}).map(function(o){return o.t;});
+    if(!items.length)return;
+    var det=document.createElement("details"); det.className="section"; det.open=true;
+    var cards=items.map(function(t){
+      var tag=t.type?'<span class="tag '+(TYPE_CLASS[t.type]||"")+'">'+esc(t.type)+'</span>':"";
+      return '<a class="card" href="'+esc(linkOf(t))+'"><p class="name"><span class="emoji">'+esc(t.emoji)+
+             '</span>'+esc(t.name)+'</p><p class="desc">'+esc(t.desc)+'</p><div class="meta">'+tag+'</div></a>';
+    }).join("");
+    det.innerHTML='<summary class="cat"><span class="chev">▸</span>'+esc(cat)+
+                  '<span class="count">'+items.length+'</span></summary><div class="grid">'+cards+'</div>';
+    app.appendChild(det);
+  });
+}
+</script>
+</body>
+</html>

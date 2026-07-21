@@ -136,6 +136,20 @@
     </div>
 
     <div class="way">
+      <div class="wayttl">🧑‍🏫 선생님(admin)에게 배포 <span class="rec">3단</span></div>
+      <p class="hint" style="margin:0 0 8px">다른 선생님께 줄 <b>admin 링크</b>를 만들어요. 그 선생님이 링크를 열어 <b>자기 exec 주소만 넣으면</b> 학생용 링크·QR이 자동으로 나옵니다. (도구 구성은 지금 고른 그대로 고정 · 내 exec는 안 담겨요)</p>
+      <button class="go alt" id="adminBtn" disabled>🧑‍🏫 선생님용(admin) 링크 + QR 만들기</button>
+      <div class="out" id="adminOut"></div>
+      <div id="adminQrBox" style="display:none;margin-top:12px;text-align:center">
+        <div id="adminQrImg" style="width:230px;height:230px;margin:0 auto;background:#fff;border-radius:10px;padding:8px"></div>
+        <div class="row" style="justify-content:center;margin:10px 0 0">
+          <button id="adminCopy">링크 복사</button>
+          <a id="adminSaveQr" class="dl" download="admin_QR.png">QR 이미지 저장</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="way">
       <div class="wayttl">📄 HTML 파일</div>
       <p class="hint" style="margin:0 0 8px">파일 하나로 전달(카톡·메일 첨부). 인터넷 없이도 열려요.</p>
       <button class="go alt" id="exportBtn" disabled>📄 공유용 HTML 파일로 내보내기</button>
@@ -150,6 +164,7 @@
 <script>
 const GH_USER = "hongyul67-cpu";
 const VIEWER  = "https://hongyul67-cpu.github.io/links/s.html";   // 공유 모음 뷰어(공개 저장소)
+const ADMIN_VIEWER = "https://hongyul67-cpu.github.io/links-master/admin.html"; // 선생님 설정 페이지(3단: master→admin→user)
 
 const CATEGORIES = ["전공 · 자동화설비 · 기계","전공 · 드론 제작 (항공드론과)","전공 · 3D프린터운용기능사","전공 · 전기기능사","전공 · 컴퓨터활용능력 1급","인문 · 기초학습","글로벌 현장학습 (호주)","교사 도우미 (수업 · 행정)","학급 관리"];
 const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
@@ -249,6 +264,8 @@ function refresh(){
   exportBtn.disabled = previewBtn.disabled = (n===0);
   const lb = document.getElementById("linkBtn");
   if(lb) lb.disabled = (n===0);
+  const ab = document.getElementById("adminBtn");
+  if(ab) ab.disabled = (n===0);
   refreshCounts();
 }
 boxes.forEach(b => b.addEventListener("change", refresh));
@@ -539,6 +556,72 @@ document.getElementById("linkBtn").onclick = ()=>{
 document.getElementById("copyLink").onclick = function(){
   const url = buildShareUrl();
   navigator.clipboard.writeText(url).then(()=>{
+    this.textContent="복사됨 ✓";
+    setTimeout(()=>{ this.textContent="링크 복사"; }, 1500);
+  });
+};
+
+/* ══════════ 선생님(admin) 링크 만들기 ══════════
+   고른 도구만 admin.html 주소(?d=)에 담습니다. exec 는 담지 않아요 —
+   admin.html 을 연 선생님이 자기 exec 를 넣으면 user.html 학생 링크가 자동 생성됩니다.
+   (데이터 형식은 s.html·user.html 과 동일 — v/t/c/l 순서 고정) */
+function buildAdminUrl(){
+  const title = (document.getElementById("title").value||"학습 도구 모음").trim();
+  const payload = {
+    v: SHARE_FMT,
+    t: title,
+    c: CATEGORIES,
+    l: picked().map(t => [t.emoji||"🔗", t.name, t.desc||"", t.repo||"", t.url||"", t.cat||"기타", t.type||""])
+  };
+  return ADMIN_VIEWER + "?d=" + LZString.compressToEncodedURIComponent(JSON.stringify(payload));
+}
+
+document.getElementById("adminBtn").onclick = ()=>{
+  const out = document.getElementById("adminOut");
+  const qrBox = document.getElementById("adminQrBox");
+  if(typeof LZString === "undefined"){
+    out.style.display="block";
+    out.textContent="⚠️ 압축 라이브러리를 못 불러왔어요. 인터넷 연결을 확인하세요.";
+    return;
+  }
+  const url = buildAdminUrl();
+  out.style.display="block";
+  out.textContent = url;
+  const box = document.getElementById("adminQrImg");
+  if(typeof qrcode === "undefined"){
+    qrBox.style.display="block";
+    box.innerHTML='<div style="color:#dc2626;font-size:12px;padding:20px">QR 라이브러리를 못 불러왔어요.<br>링크는 복사해서 쓰실 수 있어요.</div>';
+    document.getElementById("adminSaveQr").style.display="none";
+    return;
+  }
+  try{
+    const qr = qrcode(0, "L");
+    qr.addData(url); qr.make();
+    const gif = qr.createDataURL(6, 6);
+    box.innerHTML = '<img src="'+gif+'" alt="admin QR">';
+    qrBox.style.display="block";
+    const save = document.getElementById("adminSaveQr");
+    save.style.display=""; save.href = gif;
+    save.download = ((document.getElementById("title").value||"admin").trim().replace(/[\\/:*?"<>|]/g,"_")) + "_admin_QR.gif";
+    const im = new Image();
+    im.onload = function(){
+      try{
+        const c=document.createElement("canvas"); c.width=im.width; c.height=im.height;
+        c.getContext("2d").drawImage(im,0,0);
+        save.href=c.toDataURL("image/png");
+        save.download = save.download.replace(/\.gif$/,".png");
+      }catch(e){}
+    };
+    im.src = gif;
+    out.textContent = url + "\n\n주소 길이: " + url.length + "자" + (url.length>1200 ? " (김 — 도구를 줄이면 QR이 더 잘 읽혀요)" : " (QR 스캔 양호)");
+  }catch(e){
+    qrBox.style.display="block";
+    box.innerHTML='<div style="color:#dc2626;font-size:12px;padding:20px">주소가 너무 길어 QR을 못 만들었어요.<br>도구 수를 줄여보세요.</div>';
+  }
+};
+
+document.getElementById("adminCopy").onclick = function(){
+  navigator.clipboard.writeText(buildAdminUrl()).then(()=>{
     this.textContent="복사됨 ✓";
     setTimeout(()=>{ this.textContent="링크 복사"; }, 1500);
   });
