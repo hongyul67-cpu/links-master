@@ -151,7 +151,7 @@
 const GH_USER = "hongyul67-cpu";
 const VIEWER  = "https://hongyul67-cpu.github.io/links/s.html";   // 공유 모음 뷰어(공개 저장소)
 
-const CATEGORIES = ["전공 · 자동화설비 · 기계","전공 · 3D프린터운용기능사","전공 · 전기기능사","전공 · 컴퓨터활용능력 1급","인문 · 기초학습","글로벌 현장학습 (호주)","교사 도우미 (수업 · 행정)","학급 관리"];
+const CATEGORIES = ["전공 · 자동화설비 · 기계","전공 · 드론 제작 (항공드론과)","전공 · 3D프린터운용기능사","전공 · 전기기능사","전공 · 컴퓨터활용능력 1급","인문 · 기초학습","글로벌 현장학습 (호주)","교사 도우미 (수업 · 행정)","학급 관리"];
 const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
 
 /* ══════════════════════════════════════════════════════════
@@ -166,6 +166,11 @@ const TOOLS = [
   { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 (SolidWorks 입문 전)", repo:"section-view-explorer", cat:"전공 · 자동화설비 · 기계", type:"개념" },
   { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"전공 · 자동화설비 · 기계", type:"문제풀이", rc:true },
   { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"전공 · 자동화설비 · 기계", type:"문제풀이", rc:true },
+
+  { emoji:"🚁", name:"드론 만들기 게임 · 픽스호크", desc:"부품도감→프레임·모터 조립→픽스호크 결선→프로펠러→조종기 세팅→미션플래너 보정→가상 시험비행", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-pixhawk.html", cat:"전공 · 드론 제작 (항공드론과)", type:"게임", rc:true },
+  { emoji:"🛩️", name:"드론 만들기 게임 · 아두이노 나노", desc:"FC기판 핀 결선표 · 3D출력 설정 · 모터/ESC 조립 · MultiWii 세팅 · ESC보정·안전점검", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-arduino.html", cat:"전공 · 드론 제작 (항공드론과)", type:"게임", rc:true },
+  { emoji:"📝", name:"드론 제작 실습 보고서", desc:"만들기 게임 기록 자동 유입 · 자기평가 · 서술형 4문항 · 사진첨부 · A4 인쇄/PDF", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/report.html", cat:"전공 · 드론 제작 (항공드론과)", type:"문제풀이", rc:true },
+  { emoji:"🔧", name:"드론 제작 마스터 (허브)", desc:"드론 만들기 게임 2종 + 실습 보고서 + 이론 차시 모음", repo:"drone-master", cat:"전공 · 드론 제작 (항공드론과)", type:"개념" },
 
   { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"전공 · 3D프린터운용기능사", type:"문제풀이", rc:true },
 
