@@ -29,6 +29,11 @@
   .ccount.has{color:var(--ok);border-color:var(--ok)}
   .citems{padding-bottom:6px}
   details.shcat:not([open]) > .citems{display:none}
+  /* 하위 묶음(예: 컴퓨터활용능력 → 1급/2급) */
+  details.shcat.sub{border-top:0;margin:2px 0 2px 12px;border-left:2px solid var(--line);padding-left:8px}
+  details.shcat.sub > summary{font-size:12px;font-weight:700;color:var(--dim)}
+  details.shcat.sub > summary:hover{color:var(--tx)}
+  details.shcat.sub[open] > summary{color:var(--accent)}
 
   /* 검색 */
   .search{position:relative;margin-bottom:10px}
@@ -166,7 +171,7 @@ const GH_USER = "hongyul67-cpu";
 const VIEWER  = "https://hongyul67-cpu.github.io/links/s.html";   // 공유 모음 뷰어(공개 저장소)
 const ADMIN_VIEWER = "https://hongyul67-cpu.github.io/links/admin.html"; // 선생님 설정 페이지(links 저장소 = 학생용 안전 위치)
 
-const CATEGORIES = ["전공 · 자동화설비 · 기계","전공 · 드론 제작 (항공드론과)","전공 · 3D프린터운용기능사","전공 · 전기기능사","전공 · 컴퓨터활용능력 1급","인문 · 기초학습","글로벌 현장학습 (호주)","교사 도우미 (수업 · 행정)","학급 관리"];
+const CATEGORIES = ["전공 · 자동화설비 · 기계","전공 · 드론 제작 (항공드론과)","전공 · 3D프린터운용기능사","전공 · 전기기능사","전공 · 컴퓨터활용능력","인문 · 기초학습","글로벌 현장학습 (호주)","교사 도우미 (수업 · 행정)","학급 관리"];
 const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
 
 /* ══════════════════════════════════════════════════════════
@@ -198,10 +203,13 @@ const TOOLS = [
 
   { emoji:"⚡", name:"전기기능사 필기 CBT", desc:"24회차 1,440문항 · CBT모의고사 · 유형별 랜덤 · 약점 집중 · 오답노트", repo:"electrician-written-exam", cat:"전공 · 전기기능사", type:"문제풀이", rc:true },
 
-  { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"전공 · 컴퓨터활용능력 1급", type:"게임", rc:true },
-  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"실전 60문항 모의고사 · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"전공 · 컴퓨터활용능력 1급", type:"문제풀이", rc:true },
-  { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·배열수식 등)", repo:"comhwal-excel", cat:"전공 · 컴퓨터활용능력 1급", type:"문제풀이", rc:true },
-  { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·집계 등)", repo:"comhwal-access", cat:"전공 · 컴퓨터활용능력 1급", type:"문제풀이", rc:true },
+  { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"전공 · 컴퓨터활용능력", sub:"1급", type:"게임", rc:true },
+  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"실전 60문항 모의고사 · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"전공 · 컴퓨터활용능력", sub:"1급", type:"문제풀이", rc:true },
+  { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·배열수식 등)", repo:"comhwal-excel", cat:"전공 · 컴퓨터활용능력", sub:"1급", type:"문제풀이", rc:true },
+  { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·집계 등)", repo:"comhwal-access", cat:"전공 · 컴퓨터활용능력", sub:"1급", type:"문제풀이", rc:true },
+  { emoji:"🎓", name:"컴활 2급 필기 개념게임", desc:"컴퓨터 일반 · 스프레드시트 일반 2과목 · 카드/스피드퀴즈/OX/매칭", repo:"comhwal2", cat:"전공 · 컴퓨터활용능력", sub:"2급", type:"게임", rc:true },
+  { emoji:"📝", name:"컴활 2급 필기 CBT", desc:"실제 기출 320문항 · CBT 모의고사·과락판정·오답노트", repo:"comhwal2-cbt", cat:"전공 · 컴퓨터활용능력", sub:"2급", type:"문제풀이", rc:true },
+  { emoji:"📊", name:"컴활 2급 실기 함수 연습소", desc:"엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (2급 범위)", repo:"comhwal2-excel", cat:"전공 · 컴퓨터활용능력", sub:"2급", type:"문제풀이", rc:true },
 
   { emoji:"📊", name:"기초학력 진단 도구", desc:"중학생 국·영·수 60문항 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"인문 · 기초학습", type:"문제풀이", rc:true },
 
@@ -235,15 +243,31 @@ function toolUrl(t){ return t.url || ("https://" + GH_USER + ".github.io/" + t.r
 const listEl = document.getElementById("list");
 const cats = CATEGORIES.slice();
 TOOLS.forEach(t => { if(t.cat && !cats.includes(t.cat)) cats.push(t.cat); });
+function itemHTML(o){
+  return `<div class="item"><input type="checkbox" data-i="${o.i}" title="공유 목록에 담기">
+      <a class="nm" href="${esc(toolUrl(o.t))}" target="_blank" rel="noopener" title="프로그램 열기">${esc(o.t.emoji||"🔗")} ${esc(o.t.name)}</a>
+      ${o.t.rc?'<span class="rcbadge">결과수집</span>':''}</div>`;
+}
 listEl.innerHTML = cats.map(cat => {
   const items = TOOLS.map((t,i)=>({t,i})).filter(o => (o.t.cat||"기타")===cat);
   if(!items.length) return "";
+  let inner;
+  if(items.some(o => o.t.sub)){
+    /* 하위 묶음(예: 컴퓨터활용능력 → 1급/2급). sub 등장 순서로 중첩 details */
+    const subs = [];
+    items.forEach(o => { const s=o.t.sub||"기타"; if(!subs.includes(s)) subs.push(s); });
+    inner = subs.map(sub => {
+      const its = items.filter(o => (o.t.sub||"기타")===sub);
+      return `<details class="shcat sub">
+        <summary><span class="chev">▸</span>${esc(sub)}<span class="ccount">0 / ${its.length}</span></summary>
+        <div class="citems">` + its.map(itemHTML).join("") + `</div></details>`;
+    }).join("");
+  } else {
+    inner = items.map(itemHTML).join("");
+  }
   return `<details class="shcat">
     <summary><span class="chev">▸</span>${esc(cat)}<span class="ccount">0 / ${items.length}</span></summary>
-    <div class="citems">` + items.map(o =>
-    `<div class="item"><input type="checkbox" data-i="${o.i}" title="공유 목록에 담기">
-      <a class="nm" href="${esc(toolUrl(o.t))}" target="_blank" rel="noopener" title="프로그램 열기">${esc(o.t.emoji||"🔗")} ${esc(o.t.name)}</a>
-      ${o.t.rc?'<span class="rcbadge">결과수집</span>':''}</div>`).join("") + `</div></details>`;
+    <div class="citems">${inner}</div></details>`;
 }).join("");
 
 const boxes = [...listEl.querySelectorAll("input")];
@@ -514,7 +538,7 @@ function buildShareUrl(){
     r: (!gid && rc) ? rc : undefined,   // 형식이 exec 아니면 전체주소로 보존(호환)
     a: allowRc ? 1 : undefined,
     // 간결형 배열: [emoji,name,repo,url,cat,type]  ← 순서 고정! (v1의 desc·전체 c 제거)
-    l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", t.cat||"기타", t.type||""])
+    l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", (t.sub?(t.cat+" · "+t.sub):(t.cat||"기타")), t.type||""])
   };
   const packed = LZString.compressToEncodedURIComponent(JSON.stringify(payload));
   return VIEWER + "?d=" + packed;
@@ -594,7 +618,7 @@ function buildAdminUrl(){
     v: SHARE_FMT,
     t: title,
     // 간결형 배열: [emoji,name,repo,url,cat,type] (desc·전체 c 제거) · exec 는 선생님이 admin에서 입력
-    l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", t.cat||"기타", t.type||""])
+    l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", (t.sub?(t.cat+" · "+t.sub):(t.cat||"기타")), t.type||""])
   };
   return ADMIN_VIEWER + "?d=" + LZString.compressToEncodedURIComponent(JSON.stringify(payload));
 }
