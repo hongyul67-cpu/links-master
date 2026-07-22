@@ -543,7 +543,10 @@ document.getElementById("linkBtn").onclick = ()=>{
   try{
     const qr = qrcode(0, "L");            // 자동 크기 · 낮은 오류보정(주소가 길어서)
     qr.addData(url); qr.make();
-    const gif = qr.createDataURL(6, 6);
+    const mod = qr.getModuleCount();
+    const qver = (mod - 17) / 4;          // QR 버전(낮을수록 성겨서 스캔 쉬움)
+    const cell = mod > 100 ? 8 : 10;      // 촘촘할수록 셀을 키워 저장/인쇄 시 또렷하게
+    const gif = qr.createDataURL(cell, 4*cell);
     box.innerHTML = '<img src="'+gif+'" alt="QR">';
     qrBox.style.display="block";
     const save = document.getElementById("saveQr");
@@ -560,7 +563,12 @@ document.getElementById("linkBtn").onclick = ()=>{
       }catch(e){}
     };
     im.src = gif;
-    linkOut.textContent = url + "\n\n주소 길이: " + url.length + "자" + (url.length>1200 ? " (김 — 도구를 줄이면 QR이 더 잘 읽혀요)" : " (QR 스캔 양호)");
+    const n = picked().length;
+    const grade = qver<=13 ? "QR 성겨서 스캔 아주 쉬워요 👍"
+                : qver<=17 ? "QR 스캔 양호 👍"
+                : qver<=21 ? "QR 조금 촘촘 — 도구를 5개 이하로 줄이면 더 쉬워요"
+                :            "QR 꽤 촘촘 — 도구를 나눠 QR 2장으로 보내면 스캔이 훨씬 쉬워요";
+    linkOut.textContent = url + "\n\n도구 " + n + "개 · 주소 " + url.length + "자 · QR " + mod + "칸(v" + qver + ") · " + grade;
   }catch(e){
     qrBox.style.display="block";
     box.innerHTML='<div style="color:#dc2626;font-size:12px;padding:20px">주소가 너무 길어 QR을 못 만들었어요.<br>도구 수를 줄여보세요.</div>';
