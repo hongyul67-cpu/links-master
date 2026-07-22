@@ -224,6 +224,7 @@ const TOOLS = [
   { emoji:"📥", name:"결과수집 백엔드 (result-collector)", desc:"links/collector.js 로 통합된 폴백 저장소 · 더 이상 수정 안 함", url:"https://github.com/hongyul67-cpu/result-collector", cat:"내부·관리용 (공유하지 마세요)" },
   { emoji:"📸", name:"화면 캡처 SnapShot", desc:"Windows 화면 캡처 프로그램 · 저장소에서 SnapShot.exe 내려받아 실행", url:"https://github.com/hongyul67-cpu/snapshot-capture", cat:"내부·관리용 (공유하지 마세요)" },
   { emoji:"🖥️", name:"폰 ↔ PC 원격 (phone-pc-remote)", desc:"개인용 원격 조작 도구 · 비공개 저장소", url:"https://github.com/hongyul67-cpu/phone-pc-remote", cat:"내부·관리용 (공유하지 마세요)" },
+  { emoji:"🔁", name:"시간표 · 결보강 시스템", desc:"특성화고 시간표 정규화 + 결강→보강 자동추천 (exe/html) · 교사 실명 포함 비공개, 공유 금지", url:"https://github.com/hongyul67-cpu/timetable-substitute", cat:"내부·관리용 (공유하지 마세요)" },
 ];
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -237,7 +238,7 @@ TOOLS.forEach(t => { if(t.cat && !cats.includes(t.cat)) cats.push(t.cat); });
 listEl.innerHTML = cats.map(cat => {
   const items = TOOLS.map((t,i)=>({t,i})).filter(o => (o.t.cat||"기타")===cat);
   if(!items.length) return "";
-  return `<details class="shcat" open>
+  return `<details class="shcat">
     <summary><span class="chev">▸</span>${esc(cat)}<span class="ccount">0 / ${items.length}</span></summary>
     <div class="citems">` + items.map(o =>
     `<div class="item"><input type="checkbox" data-i="${o.i}" title="공유 목록에 담기">
