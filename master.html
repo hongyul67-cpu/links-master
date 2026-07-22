@@ -498,14 +498,19 @@ previewBtn.onclick = ()=>{
    ══════════════════════════════════════ */
 const SHARE_FMT = 2;   // 2 = 간결형(desc·전체 카테고리 제거). v1 은 뷰어가 계속 호환 처리.
 
+/* exec 전체주소에서 배포ID만 추출 (주소 단축용). 형식 안 맞으면 "" */
+function execId(u){ const m=/^https:\/\/script\.google\.com\/macros\/s\/(.+)\/exec$/.exec(u||""); return m?m[1]:""; }
+
 function buildShareUrl(){
   const title = (document.getElementById("title").value||"학습 도구 모음").trim();
   const rc = document.getElementById("rc").value.trim();
   const allowRc = document.getElementById("allowRc").checked;
+  const gid = execId(rc);
   const payload = {
     v: SHARE_FMT,
     t: title,
-    r: rc || undefined,
+    g: gid || undefined,               // exec 배포ID만 담아 주소 단축 (뷰어가 앞뒤 붙여 복원)
+    r: (!gid && rc) ? rc : undefined,   // 형식이 exec 아니면 전체주소로 보존(호환)
     a: allowRc ? 1 : undefined,
     // 간결형 배열: [emoji,name,repo,url,cat,type]  ← 순서 고정! (v1의 desc·전체 c 제거)
     l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", t.cat||"기타", t.type||""])
