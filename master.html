@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
 <title>🗝️ 링크모음 마스터 (나만 보는 파일)</title>
 <style>
   :root{--bg:#0f1420;--card:#1a2130;--card2:#222c40;--line:#2c3852;--tx:#eef2fb;--dim:#9aa7c2;--accent:#5b8cff;--ok:#38d39f;--warn:#f0a742;--game:#38d39f;--concept:#5b8cff;--quiz:#f0a742}
@@ -78,6 +79,39 @@
   .cmeta .tag.t-concept{color:var(--concept);background:color-mix(in srgb,var(--concept) 16%,transparent)}
   .cmeta .tag.t-quiz{color:var(--quiz);background:color-mix(in srgb,var(--quiz) 16%,transparent)}
   .item .rcbadge{font-size:10px;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:0 6px;white-space:nowrap}
+  /* 배포 범위 뱃지 · 저작권/개인정보 · 개별 복사·QR */
+  .cmeta .dist{font-size:10px;font-weight:800;border-radius:999px;padding:1px 7px;white-space:nowrap}
+  .d-공개{color:var(--ok);border:1px solid var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
+  .d-수업{color:var(--quiz);border:1px solid var(--quiz);background:color-mix(in srgb,var(--quiz) 14%,transparent)}
+  .d-개인{color:#a78bfa;border:1px solid #a78bfa;background:color-mix(in srgb,#a78bfa 16%,transparent)}
+  .cmeta .flag{font-size:11px;cursor:help}
+  .item.card.flagged{border-color:color-mix(in srgb,#ef4444 45%,var(--line))}
+  .cacts{display:flex;gap:5px;margin-top:5px}
+  .cacts button{background:var(--card);color:var(--dim);border:1px solid var(--line);border-radius:7px;
+    padding:4px 9px;font-size:11.5px;cursor:pointer;font-family:inherit;font-weight:600}
+  .cacts button:hover{border-color:var(--accent);color:var(--accent)}
+  .cacts button.done{border-color:var(--ok);color:var(--ok)}
+  /* 배포범위 필터 */
+  .dfilter{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 10px}
+  .dfilter button{background:var(--card2);color:var(--dim);border:1px solid var(--line);border-radius:999px;
+    padding:5px 12px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .dfilter button:hover{color:var(--tx)}
+  .dfilter button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+  .dfilter button[data-d="공개"].on{background:var(--ok);border-color:var(--ok);color:#0f1420}
+  .dfilter button[data-d="수업"].on{background:var(--quiz);border-color:var(--quiz);color:#0f1420}
+  .dfilter button[data-d="개인"].on{background:#a78bfa;border-color:#a78bfa;color:#0f1420}
+  /* QR 모달 (개별 도구 전달) */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;z-index:60;padding:18px}
+  .modal.on{display:flex}
+  .mbox{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:18px;max-width:370px;width:100%;text-align:center}
+  .mttl{font-size:15px;font-weight:800;margin:0 0 3px}
+  .murl{color:var(--dim);font-size:11px;word-break:break-all;margin:0 0 12px}
+  .qrimg{width:min(270px,70vw);height:min(270px,70vw);margin:0 auto;background:#fff;border-radius:12px;padding:10px}
+  .qrimg img{width:100%;height:100%;image-rendering:pixelated;display:block}
+  .mrow{display:flex;gap:8px;margin-top:14px}
+  .mrow button{flex:1;border-radius:9px;padding:10px;font-size:13.5px;font-weight:700;cursor:pointer;font-family:inherit;
+    background:var(--card2);color:var(--tx);border:1px solid var(--line)}
+  .mrow button.pri{background:var(--accent);color:#fff;border-color:var(--accent)}
   .row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
   .row button{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:8px;padding:6px 11px;font-size:12.5px;cursor:pointer;font-family:inherit}
   label.fld{display:block;font-size:12.5px;font-weight:700;margin:12px 0 5px}
@@ -112,6 +146,13 @@
       <span class="ico">🔎</span>
       <input id="q" type="text" placeholder="도구 검색 (이름·설명·분야)">
       <button class="clr" id="qclr" title="지우기">✕</button>
+    </div>
+    <div class="dfilter" id="dfilter">
+      <button data-d="전체" class="on">전체</button>
+      <button data-d="공개">공개</button>
+      <button data-d="수업">수업</button>
+      <button data-d="개인">개인</button>
+      <span class="hint" id="dinfo" style="margin:0;align-self:center"></span>
     </div>
     <div class="row">
       <button id="selAll">전체 선택</button>
@@ -184,6 +225,19 @@
   </div>
 </div>
 
+<!-- 개별 도구 QR (수업 중 화면에 바로 띄우기) -->
+<div class="modal" id="modal">
+  <div class="mbox">
+    <p class="mttl" id="mttl"></p>
+    <p class="murl" id="murl"></p>
+    <div class="qrimg" id="qrimg"></div>
+    <div class="mrow">
+      <button id="mcopy">링크 복사</button>
+      <button class="pri" id="mclose">닫기</button>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script>
@@ -219,89 +273,89 @@ const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
    ══════════════════════════════════════════════════════════ */
 const TOOLS = [
   /* ── 전공 · 자동화설비 · 기계 ── */
-  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비 · 기계", type:"게임", rc:true },
-  { emoji:"🧩", name:"블록 뷰 매칭", desc:"정투상도(투상도) 연습 게임", repo:"block-view-matching", cat:"자동화설비 · 기계", type:"게임", rc:true },
-  { emoji:"🔍", name:"도면읽기 마스터", desc:"선의 종류 · 치수 읽기 · 기계요소 약도 + 종합시험", repo:"domyeon-master", cat:"자동화설비 · 기계", type:"개념", rc:true },
-  { emoji:"📐", name:"투상도 마스터", desc:"정투상 · 제3각법 — 배우기 + 투상법 종류 / 3면도 배치 / 입체→투상도 3모드 + 종합점검", repo:"tusang-master", cat:"자동화설비 · 기계", type:"개념", rc:true },
-  { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"자동화설비 · 기계", type:"개념", rc:true },
-  { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 (SolidWorks 입문 전)", repo:"section-view-explorer", cat:"자동화설비 · 기계", type:"개념" },
-  { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true },
-  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true },
+  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비 · 기계", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🧩", name:"블록 뷰 매칭", desc:"정투상도(투상도) 연습 게임", repo:"block-view-matching", cat:"자동화설비 · 기계", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🔍", name:"도면읽기 마스터", desc:"선의 종류 · 치수 읽기 · 기계요소 약도 + 종합시험", repo:"domyeon-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📐", name:"투상도 마스터", desc:"정투상 · 제3각법 — 배우기 + 투상법 종류 / 3면도 배치 / 입체→투상도 3모드 + 종합점검", repo:"tusang-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
+  { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 (SolidWorks 입문 전)", repo:"section-view-explorer", cat:"자동화설비 · 기계", type:"개념", dist:"공개" },
+  { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true, dist:"공개" },
 
   /* ── 전공 · 공조냉동 · 에너지제어 ── */
-  { emoji:"❄️", name:"공조냉동 자동제어 마스터", desc:"시퀀스 회로 4종 · 표준 냉동 계통도 · 안전 — 배우기 + 게임 4종 + 졸업고사 20문항 점검", repo:"gongjo-master", cat:"공조냉동 · 에너지제어", type:"게임", rc:true },
-  { emoji:"🌬️", name:"공기조화설비 개념게임", desc:"교과서 6단원(기초·부하·설비·시스템·자동제어·시공) — 배우기 카드 + 짝맞추기·분류·순서맞추기 4모드", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/game.html", cat:"공조냉동 · 에너지제어", type:"게임" },
-  { emoji:"📝", name:"공기조화설비 점검 CBT", desc:"단원·문항 수 선택 · 자동 채점 · 오답노트 · 결과 제출 (문제 44)", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/check.html", cat:"공조냉동 · 에너지제어", type:"문제풀이", rc:true },
+  { emoji:"❄️", name:"공조냉동 자동제어 마스터", desc:"시퀀스 회로 4종 · 표준 냉동 계통도 · 안전 — 배우기 + 게임 4종 + 졸업고사 20문항 점검", repo:"gongjo-master", cat:"공조냉동 · 에너지제어", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🌬️", name:"공기조화설비 개념게임", desc:"교과서 6단원(기초·부하·설비·시스템·자동제어·시공) — 배우기 카드 + 짝맞추기·분류·순서맞추기 4모드", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/game.html", cat:"공조냉동 · 에너지제어", type:"게임", dist:"공개" },
+  { emoji:"📝", name:"공기조화설비 점검 CBT", desc:"단원·문항 수 선택 · 자동 채점 · 오답노트 · 결과 제출 (문제 44)", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/check.html", cat:"공조냉동 · 에너지제어", type:"문제풀이", rc:true, dist:"수업" },
 
   /* ── 전공 · 드론 제작 (항공드론과) ── */
-  { emoji:"🚁", name:"드론 만들기 게임 · 픽스호크", desc:"부품도감→프레임·모터 조립→픽스호크 결선→프로펠러→조종기 세팅→미션플래너 보정→가상 시험비행", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-pixhawk.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true },
-  { emoji:"🛩️", name:"드론 만들기 게임 · 아두이노 나노", desc:"FC기판 핀 결선표 · 3D출력 설정 · 모터/ESC 조립 · MultiWii 세팅 · ESC보정·안전점검", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-arduino.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true },
-  { emoji:"📦", name:"드론 임무장치 만들기", desc:"에어 드롭 장치·2축 짐벌 — 인벤터 모델링 순서·출력 설정·서보 제어로 실제 투하", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-mission-device.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true },
-  { emoji:"📝", name:"드론 제작 실습 보고서", desc:"만들기 게임 기록 자동 유입 · 자기평가 · 서술형 4문항 · 사진첨부 · A4 인쇄/PDF", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/report.html", cat:"드론 제작 (항공드론과)", type:"문제풀이", rc:true },
-  { emoji:"🔧", name:"드론 제작 마스터 (허브)", desc:"만들기 게임 3종 + 이론 6차시 + 실습 보고서 전체 모음", repo:"drone-master", cat:"드론 제작 (항공드론과)", type:"개념" },
-  { emoji:"🛩️", name:"드론 1차시 · 드론 개요", desc:"UAV·UAS·RPAS / 고정익·회전익·틸트로터·하이브리드 / 역사 기체 카드", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/01-drone-overview.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true },
-  { emoji:"🪂", name:"드론 2차시 · 비행 원리", desc:"양력·중력·추력·항력 + 스로틀/엘리베이터/에일러론/러더를 직접 조종해 익히기", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/02-flight-principle.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true },
-  { emoji:"🔩", name:"드론 3차시 · 드론의 구성", desc:"프레임·FC·ESC·모터·배터리·프로펠러 조립게임 + 센서게임", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/03-drone-structure.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true },
-  { emoji:"⚖️", name:"드론 4차시 · 법규와 준수사항", desc:"초경량비행장치 / 조종자 증명 1~4종(250g·2kg·7kg·25kg) / 준수사항", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/04-drone-law.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true },
-  { emoji:"🔋", name:"드론 5차시 · 배터리·센서·검사", desc:"리포 전압 / 센서 5종 / 안전성인증검사 4종 / 비행승인 / 벌칙", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/05-battery-sensor-check.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true },
-  { emoji:"🗺️", name:"드론 6차시 · 신고번호와 공역", desc:"신고번호 C/N·M/H/P/S / 공역 A~G / 관제·비관제·통제·주의공역", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/06-registration-airspace.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true },
+  { emoji:"🚁", name:"드론 만들기 게임 · 픽스호크", desc:"부품도감→프레임·모터 조립→픽스호크 결선→프로펠러→조종기 세팅→미션플래너 보정→가상 시험비행", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-pixhawk.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🛩️", name:"드론 만들기 게임 · 아두이노 나노", desc:"FC기판 핀 결선표 · 3D출력 설정 · 모터/ESC 조립 · MultiWii 세팅 · ESC보정·안전점검", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-arduino.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
+  { emoji:"📦", name:"드론 임무장치 만들기", desc:"에어 드롭 장치·2축 짐벌 — 인벤터 모델링 순서·출력 설정·서보 제어로 실제 투하", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-mission-device.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
+  { emoji:"📝", name:"드론 제작 실습 보고서", desc:"만들기 게임 기록 자동 유입 · 자기평가 · 서술형 4문항 · 사진첨부 · A4 인쇄/PDF", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/report.html", cat:"드론 제작 (항공드론과)", type:"문제풀이", rc:true, dist:"수업" },
+  { emoji:"🔧", name:"드론 제작 마스터 (허브)", desc:"만들기 게임 3종 + 이론 6차시 + 실습 보고서 전체 모음", repo:"drone-master", cat:"드론 제작 (항공드론과)", type:"개념", dist:"공개" },
+  { emoji:"🛩️", name:"드론 1차시 · 드론 개요", desc:"UAV·UAS·RPAS / 고정익·회전익·틸트로터·하이브리드 / 역사 기체 카드", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/01-drone-overview.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🪂", name:"드론 2차시 · 비행 원리", desc:"양력·중력·추력·항력 + 스로틀/엘리베이터/에일러론/러더를 직접 조종해 익히기", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/02-flight-principle.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🔩", name:"드론 3차시 · 드론의 구성", desc:"프레임·FC·ESC·모터·배터리·프로펠러 조립게임 + 센서게임", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/03-drone-structure.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
+  { emoji:"⚖️", name:"드론 4차시 · 법규와 준수사항", desc:"초경량비행장치 / 조종자 증명 1~4종(250g·2kg·7kg·25kg) / 준수사항", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/04-drone-law.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🔋", name:"드론 5차시 · 배터리·센서·검사", desc:"리포 전압 / 센서 5종 / 안전성인증검사 4종 / 비행승인 / 벌칙", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/05-battery-sensor-check.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🗺️", name:"드론 6차시 · 신고번호와 공역", desc:"신고번호 C/N·M/H/P/S / 공역 A~G / 관제·비관제·통제·주의공역", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/06-registration-airspace.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
 
   /* ── 전공 · 3D프린터운용기능사 ── */
-  { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true },
+  { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
 
   /* ── 전공 · 전기기능사 ── */
-  { emoji:"⚡", name:"전기기능사 필기 CBT", desc:"24회차 1,440문항 · CBT모의고사 · 유형별 랜덤 · 약점 집중 · 오답노트", repo:"electrician-written-exam", cat:"전기기능사", type:"문제풀이", rc:true },
+  { emoji:"⚡", name:"전기기능사 필기 CBT", desc:"24회차 1,440문항 · CBT모의고사 · 유형별 랜덤 · 약점 집중 · 오답노트", repo:"electrician-written-exam", cat:"전기기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
 
   /* ── 전공 · 열처리기능사 ── */
-  { emoji:"🔥", name:"열처리 마스터", desc:"금속열처리작업 — 배우기 8카드 + 열처리로 시뮬레이터(조직·HRC·선도) + 게임 4종 + 15문항 점검·결과카드 (SM45C·SCM440 공개문제 기반)", repo:"heat-treatment-master", cat:"열처리기능사", type:"개념" },
+  { emoji:"🔥", name:"열처리 마스터", desc:"금속열처리작업 — 배우기 8카드 + 열처리로 시뮬레이터(조직·HRC·선도) + 게임 4종 + 15문항 점검·결과카드 (SM45C·SCM440 공개문제 기반)", repo:"heat-treatment-master", cat:"열처리기능사", type:"개념", dist:"공개" },
 
   /* ── 전공 · 금속재료시험기능사 ── */
-  { emoji:"🔩", name:"금속재료시험 마스터", desc:"금속재료시험작업 — 배우기 7주제(불꽃·경도·충격·조직 + 필답) + 게임 4종(불꽃·조직 캔버스 판별·경도/충격 계산·개념매칭) + 필답 CBT 20문항 (공개 실기문제·필답 기출 기반)", repo:"metal-materials-master", cat:"금속재료시험기능사", type:"개념", rc:true },
+  { emoji:"🔩", name:"금속재료시험 마스터", desc:"금속재료시험작업 — 배우기 7주제(불꽃·경도·충격·조직 + 필답) + 게임 4종(불꽃·조직 캔버스 판별·경도/충격 계산·개념매칭) + 필답 CBT 20문항 (공개 실기문제·필답 기출 기반)", repo:"metal-materials-master", cat:"금속재료시험기능사", type:"개념", rc:true, dist:"수업", cr:true },
 
   /* ── 전공 · 컴퓨터활용능력 1급 ── */
-  { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"컴퓨터활용능력 1급", type:"게임", rc:true },
-  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"실전 60문항 모의고사 · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true },
-  { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·배열수식 등)", repo:"comhwal-excel", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true },
-  { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·집계 등)", repo:"comhwal-access", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true },
+  { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"컴퓨터활용능력 1급", type:"게임", rc:true, dist:"수업" },
+  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"실전 60문항 모의고사 · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·배열수식 등)", repo:"comhwal-excel", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업" },
+  { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·집계 등)", repo:"comhwal-access", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업" },
 
   /* ── 전공 · 컴퓨터활용능력 2급 ── */
-  { emoji:"🎓", name:"컴활 2급 필기 개념게임", desc:"컴퓨터일반·스프레드시트 2과목 16단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal2", cat:"컴퓨터활용능력 2급", type:"게임", rc:true },
-  { emoji:"📝", name:"컴활 2급 필기 CBT", desc:"실제 기출 320문항(5회차 + 자주출제 120선) · 40문항 40분 · 과락판정·오답노트", repo:"comhwal2-cbt", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true },
-  { emoji:"📊", name:"컴활 2급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·DSUM 등)", repo:"comhwal2-excel", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true },
+  { emoji:"🎓", name:"컴활 2급 필기 개념게임", desc:"컴퓨터일반·스프레드시트 2과목 16단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal2", cat:"컴퓨터활용능력 2급", type:"게임", rc:true, dist:"수업" },
+  { emoji:"📝", name:"컴활 2급 필기 CBT", desc:"실제 기출 320문항(5회차 + 자주출제 120선) · 40문항 40분 · 과락판정·오답노트", repo:"comhwal2-cbt", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"📊", name:"컴활 2급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·DSUM 등)", repo:"comhwal2-excel", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true, dist:"수업" },
 
   /* ── 진로 · 직업생활 ── */
-  { emoji:"💼", name:"성공적인 직업생활 마스터", desc:"교과 6단원 18주제 — 배우기(기본+🔎더 알아보기) + 테스트(4지선다 92문항) + 과제 제출", repo:"job-life-master", cat:"진로 · 직업생활", type:"개념", rc:true },
+  { emoji:"💼", name:"성공적인 직업생활 마스터", desc:"교과 6단원 18주제 — 배우기(기본+🔎더 알아보기) + 테스트(4지선다 92문항) + 과제 제출", repo:"job-life-master", cat:"진로 · 직업생활", type:"개념", rc:true, dist:"수업" },
 
   /* ── 취업 · NCS 직업기초능력 ── */
-  { emoji:"🎓", name:"NCS 직업기초능력 마스터", desc:"공기업 고졸채용 필기 대비 — 10개 영역 전체(의사소통·수리·문제해결·자기개발·자원관리·대인관계·정보·기술·조직이해·직업윤리) · 배우기→게임→실전점검 CBT→전체풀이 · 기초/심화", repo:"ncs-master", cat:"취업 · NCS 직업기초능력", type:"게임", rc:true },
+  { emoji:"🎓", name:"NCS 직업기초능력 마스터", desc:"공기업 고졸채용 필기 대비 — 10개 영역 전체(의사소통·수리·문제해결·자기개발·자원관리·대인관계·정보·기술·조직이해·직업윤리) · 배우기→게임→실전점검 CBT→전체풀이 · 기초/심화", repo:"ncs-master", cat:"취업 · NCS 직업기초능력", type:"게임", rc:true, dist:"수업", cr:true },
 
   /* ── 인문 · 기초학습 ── */
-  { emoji:"📊", name:"기초학력 진단 도구", desc:"중학생 국·영·수 60문항 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"인문 · 기초학습", type:"문제풀이", rc:true },
-  { emoji:"🏫", name:"사회생활 수업 학습 도구", desc:"사회생활 수업용 학습 도구 모음", repo:"social-life-tools", cat:"인문 · 기초학습" },
+  { emoji:"📊", name:"기초학력 진단 도구", desc:"중학생 국·영·수 60문항 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"인문 · 기초학습", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"🏫", name:"사회생활 수업 학습 도구", desc:"사회생활 수업용 학습 도구 모음", repo:"social-life-tools", cat:"인문 · 기초학습", dist:"공개" },
 
   /* ── 글로벌 현장학습 (호주) ── */
-  { emoji:"🇦🇺", name:"호주 현장학습 기록장", desc:"호주 글로벌 현장학습(용접·산업 견학) 하루 기록 · 사진 2~5장 · 저녁 구글폼 제출", repo:"global-memo", cat:"글로벌 현장학습 (호주)" },
+  { emoji:"🇦🇺", name:"호주 현장학습 기록장", desc:"호주 글로벌 현장학습(용접·산업 견학) 하루 기록 · 사진 2~5장 · 저녁 구글폼 제출", repo:"global-memo", cat:"글로벌 현장학습 (호주)", dist:"수업" },
 
   /* ── 교사 도우미 (수업 · 행정) ── */
-  { emoji:"✍️", name:"생기부 문장 생성기", desc:"행동특성 · 세부능력특기사항 문장 생성", repo:"saenggibu-generator", cat:"교사 도우미 (수업 · 행정)" },
-  { emoji:"🤖", name:"실습과제 도구 모음", desc:"과제 양식 만들기 · 과제 목록 · 채점(교사용) · 제출 도구", repo:"ai-task-tools", cat:"교사 도우미 (수업 · 행정)" },
-  { emoji:"📣", name:"신입생 모집 홍보 관리", desc:"홍보 대상 중학교 우선순위 · 방문(1~6차) 기록·팀 공유 (학교 단위 데이터, 개인정보 없음)", repo:"middle-school-hongbo", cat:"교사 도우미 (수업 · 행정)" },
-  { emoji:"📥", name:"결과수집 링크 생성기", desc:"학습도구 결과를 내 구글시트로 모으기 · 교사별 공유 링크 자동 생성", url:"https://hongyul67-cpu.github.io/links/link-builder.html", cat:"교사 도우미 (수업 · 행정)" },
-  { emoji:"📖", name:"결과수집 설정 가이드", desc:"내 구글시트 연결 방법 (교사용, 컴퓨터로 5분)", url:"https://hongyul67-cpu.github.io/links/guide.html", cat:"교사 도우미 (수업 · 행정)" },
+  { emoji:"✍️", name:"생기부 문장 생성기", desc:"행동특성 · 세부능력특기사항 문장 생성", repo:"saenggibu-generator", cat:"교사 도우미 (수업 · 행정)", dist:"개인" },
+  { emoji:"🤖", name:"실습과제 도구 모음", desc:"과제 양식 만들기 · 과제 목록 · 채점(교사용) · 제출 도구", repo:"ai-task-tools", cat:"교사 도우미 (수업 · 행정)", dist:"수업" },
+  { emoji:"📣", name:"신입생 모집 홍보 관리", desc:"홍보 대상 중학교 우선순위 · 방문(1~6차) 기록·팀 공유 (학교 단위 데이터, 개인정보 없음)", repo:"middle-school-hongbo", cat:"교사 도우미 (수업 · 행정)", dist:"개인" },
+  { emoji:"📥", name:"결과수집 링크 생성기", desc:"학습도구 결과를 내 구글시트로 모으기 · 교사별 공유 링크 자동 생성", url:"https://hongyul67-cpu.github.io/links/link-builder.html", cat:"교사 도우미 (수업 · 행정)", dist:"개인" },
+  { emoji:"📖", name:"결과수집 설정 가이드", desc:"내 구글시트 연결 방법 (교사용, 컴퓨터로 5분)", url:"https://hongyul67-cpu.github.io/links/guide.html", cat:"교사 도우미 (수업 · 행정)", dist:"공개" },
 
   /* ── 학급 관리 ── */
-  { emoji:"💬", name:"상담 일지 도구", desc:"상담 내용 기록 · 관리", repo:"counseling", cat:"학급 관리" },
-  { emoji:"📅", name:"방학 시간표 관리", desc:"방학 계획 · 시간표 관리 웹앱", repo:"vacation-schedule", cat:"학급 관리" },
-  { emoji:"🎱", name:"구슬 낙하 뽑기", desc:"공이 못·서로 부딪히며 떨어져 발표 순서·당번 추첨", repo:"pinball-picker", cat:"학급 관리" },
+  { emoji:"💬", name:"상담 일지 도구", desc:"상담 내용 기록 · 관리", repo:"counseling", cat:"학급 관리", dist:"개인" },
+  { emoji:"📅", name:"방학 시간표 관리", desc:"방학 계획 · 시간표 관리 웹앱", repo:"vacation-schedule", cat:"학급 관리", dist:"개인" },
+  { emoji:"🎱", name:"구슬 낙하 뽑기", desc:"공이 못·서로 부딪히며 떨어져 발표 순서·당번 추첨", repo:"pinball-picker", cat:"학급 관리", dist:"공개" },
 
   /* ── 내부·관리용 (학생·타 교사에게 공유하지 않는 도구) ──
      CATEGORIES 마지막 영역. 여기서 골라 담지 않는 한 공유 파일엔 분류 자체가 안 들어갑니다. */
-  { emoji:"🗝️", name:"링크모음 마스터 (이 파일)", desc:"전체 도구 원본 · 공유용 파일/QR 만들기 (지금 이 화면)", url:"https://hongyul67-cpu.github.io/links-master/", cat:"내부 · 관리용 (공유하지 마세요)" },
-  { emoji:"🌐", name:"공개 허브 (links)", desc:"예전 공개 링크 허브 — 동결 유지, 건드리지 않음", url:"https://hongyul67-cpu.github.io/links/", cat:"내부 · 관리용 (공유하지 마세요)" },
-  { emoji:"📥", name:"결과수집 백엔드 (result-collector)", desc:"links/collector.js 로 통합된 폴백 저장소 · 더 이상 수정 안 함", url:"https://github.com/hongyul67-cpu/result-collector", cat:"내부 · 관리용 (공유하지 마세요)" },
-  { emoji:"📸", name:"화면 캡처 SnapShot", desc:"Windows 화면 캡처 프로그램 · 저장소에서 SnapShot.exe 내려받아 실행", url:"https://github.com/hongyul67-cpu/snapshot-capture", cat:"내부 · 관리용 (공유하지 마세요)" },
-  { emoji:"🖥️", name:"폰 ↔ PC 원격 (phone-pc-remote)", desc:"개인용 원격 조작 도구 · 비공개 저장소", url:"https://github.com/hongyul67-cpu/phone-pc-remote", cat:"내부 · 관리용 (공유하지 마세요)" },
-  { emoji:"🔁", name:"시간표 · 결보강 시스템", desc:"특성화고 시간표 정규화 + 결강→보강 자동추천 (exe/html) · 교사 실명 포함 비공개, 공유 금지", url:"https://github.com/hongyul67-cpu/timetable-substitute", cat:"내부 · 관리용 (공유하지 마세요)" },
+  { emoji:"🗝️", name:"링크모음 마스터 (이 파일)", desc:"전체 도구 원본 · 공유용 파일/QR 만들기 (지금 이 화면)", url:"https://hongyul67-cpu.github.io/links-master/", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
+  { emoji:"🌐", name:"공개 허브 (links)", desc:"예전 공개 링크 허브 — 동결 유지, 건드리지 않음", url:"https://hongyul67-cpu.github.io/links/", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
+  { emoji:"📥", name:"결과수집 백엔드 (result-collector)", desc:"links/collector.js 로 통합된 폴백 저장소 · 더 이상 수정 안 함", url:"https://github.com/hongyul67-cpu/result-collector", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
+  { emoji:"📸", name:"화면 캡처 SnapShot", desc:"Windows 화면 캡처 프로그램 · 저장소에서 SnapShot.exe 내려받아 실행", url:"https://github.com/hongyul67-cpu/snapshot-capture", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
+  { emoji:"🖥️", name:"폰 ↔ PC 원격 (phone-pc-remote)", desc:"개인용 원격 조작 도구 · 비공개 저장소", url:"https://github.com/hongyul67-cpu/phone-pc-remote", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
+  { emoji:"🔁", name:"시간표 · 결보강 시스템", desc:"특성화고 시간표 정규화 + 결강→보강 자동추천 (exe/html) · 교사 실명 포함 비공개, 공유 금지", url:"https://github.com/hongyul67-cpu/timetable-substitute", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인", pv:true },
 ];
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -316,12 +370,19 @@ function itemHTML(o){
   const t = o.t;
   const tag = t.type ? `<span class="tag ${TYPE_CLASS[t.type]||""}">${esc(t.type)}</span>` : "";
   const rc  = t.rc ? `<span class="rcbadge">결과수집</span>` : "";
-  return `<div class="item card">
+  const dist = t.dist ? `<span class="dist d-${esc(t.dist)}">${esc(t.dist)}</span>` : "";
+  const cr = t.cr ? `<span class="flag" title="외부 기출·저작물 포함 — 공개 배포 금지, 개별 전달만">⚠️</span>` : "";
+  const pv = t.pv ? `<span class="flag" title="교사 실명 등 개인정보 포함 — 공유 금지">🔒</span>` : "";
+  return `<div class="item card${(t.cr||t.pv)?" flagged":""}">
       <input type="checkbox" data-i="${o.i}" title="공유 목록에 담기">
       <span class="cbody">
         <a class="nm" href="${esc(toolUrl(t))}" target="_blank" rel="noopener" title="프로그램 열기">${esc(t.emoji||"🔗")} ${esc(t.name)}</a>
         ${t.desc?`<span class="cdesc">${esc(t.desc)}</span>`:""}
-        <span class="cmeta">${tag}${rc}</span>
+        <span class="cmeta">${dist}${cr}${pv}${tag}${rc}</span>
+        <span class="cacts">
+          <button type="button" data-copy="${esc(toolUrl(t))}" title="이 도구 주소만 복사">📋 복사</button>
+          <button type="button" data-qr="${o.i}" title="이 도구 QR (수업 중 화면 띄우기)">📱 QR</button>
+        </span>
       </span></div>`;
 }
 function cardsFor(cat){
@@ -391,6 +452,7 @@ boxes.forEach(b => b.addEventListener("change", refresh));
 /* 카드의 빈 곳을 눌러도 선택 토글 (이름 링크는 열기, 체크박스는 기본동작) */
 listEl.addEventListener("click", e => {
   if(e.target.closest("a") || e.target.closest("summary")) return;
+  if(e.target.closest("button")) return;          // 복사·QR 버튼은 선택 토글 안 함
   if(e.target.matches('input[type=checkbox]')) return;
   const card = e.target.closest(".item");
   if(!card) return;
@@ -414,6 +476,7 @@ document.getElementById("colAll").onclick  = ()=>{ listEl.querySelectorAll("deta
 const qEl = document.getElementById("q");
 const qClr = document.getElementById("qclr");
 const noHit = document.getElementById("nohit");
+let curDist = "전체";   // 배포범위 필터 (전체/공개/수업/개인)
 function applySearch(){
   const q = qEl.value.trim().toLowerCase();
   qClr.style.display = q ? "block" : "none";
@@ -427,7 +490,7 @@ function applySearch(){
     det.querySelectorAll(".item").forEach(it => {
       const t = TOOLS[+it.querySelector("input").dataset.i];
       const hay = ((t.name||"") + " " + (t.desc||"") + " " + (t.cat||"")).toLowerCase();
-      const show = !q || hay.indexOf(q) > -1;
+      const show = (!q || hay.indexOf(q) > -1) && (curDist==="전체" || t.dist===curDist);
       it.style.display = show ? "" : "none";
       if(show) vis++;
     });
@@ -442,10 +505,79 @@ function applySearch(){
     if(q && anyVis) a.open = true;
   });
   noHit.style.display = total ? "none" : "block";
+  // 배포범위 집계 (보이는 것 기준)
+  const by = {공개:0, 수업:0, 개인:0};
+  boxes.forEach(b => {
+    if(b.closest(".item").style.display === "none") return;
+    const d = TOOLS[+b.dataset.i].dist; if(d in by) by[d]++;
+  });
+  document.getElementById("dinfo").textContent =
+    `보이는 도구 ${total}개 · 공개 ${by.공개} · 수업 ${by.수업} · 개인 ${by.개인}`;
   refreshCounts();
 }
 qEl.addEventListener("input", applySearch);
 qClr.onclick = ()=>{ qEl.value=""; applySearch(); qEl.focus(); };
+
+/* 배포범위 필터 (공개/수업/개인) */
+document.getElementById("dfilter").addEventListener("click", function(e){
+  const b = e.target.closest("button"); if(!b) return;
+  curDist = b.dataset.d;
+  this.querySelectorAll("button").forEach(x => x.classList.toggle("on", x===b));
+  if(curDist!=="전체") sections.forEach(d => d.open = true);   // 필터 켜면 펼쳐서 보여줌
+  applySearch();
+});
+
+/* 개별 도구: 링크 복사 · QR (수업 중 화면에 띄우기) */
+function copyText(text, done){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(done, ()=>fallbackCopy(text, done));
+  } else fallbackCopy(text, done);
+}
+function fallbackCopy(text, done){
+  const ta=document.createElement("textarea"); ta.value=text;
+  ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); done(); }catch(e){ prompt("아래 주소를 복사하세요", text); }
+  document.body.removeChild(ta);
+}
+listEl.addEventListener("click", function(e){
+  const cp = e.target.closest("[data-copy]");
+  if(cp){
+    e.preventDefault(); e.stopPropagation();
+    copyText(cp.dataset.copy, ()=>{
+      cp.textContent="✓ 복사됨"; cp.classList.add("done");
+      setTimeout(()=>{ cp.textContent="📋 복사"; cp.classList.remove("done"); }, 1500);
+    });
+    return;
+  }
+  const qb = e.target.closest("[data-qr]");
+  if(qb){ e.preventDefault(); e.stopPropagation(); openToolQR(TOOLS[+qb.dataset.qr]); }
+});
+
+let qrUrl = "";
+function openToolQR(t){
+  qrUrl = toolUrl(t);
+  document.getElementById("mttl").textContent = (t.emoji||"🔗")+" "+t.name;
+  document.getElementById("murl").textContent = qrUrl;
+  const box = document.getElementById("qrimg");
+  if(typeof qrcode === "undefined"){
+    box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:24px">QR 라이브러리를 못 불러왔어요(인터넷 확인).<br>링크 복사는 됩니다.</div>';
+  } else {
+    try{
+      const qr = qrcode(0,"M");            // 개별 도구 주소는 짧아 M 보정으로 선명하게
+      qr.addData(qrUrl); qr.make();
+      box.innerHTML = '<img src="'+qr.createDataURL(10,8)+'" alt="QR">';
+    }catch(err){ box.innerHTML = '<div style="color:#dc2626;font-size:12px;padding:24px">QR 생성 실패</div>'; }
+  }
+  document.getElementById("modal").classList.add("on");
+}
+document.getElementById("mclose").onclick = ()=> document.getElementById("modal").classList.remove("on");
+document.getElementById("modal").addEventListener("click", function(e){ if(e.target===this) this.classList.remove("on"); });
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") document.getElementById("modal").classList.remove("on"); });
+document.getElementById("mcopy").onclick = function(){
+  const b=this;
+  copyText(qrUrl, ()=>{ b.textContent="✓ 복사됨"; setTimeout(()=>{ b.textContent="링크 복사"; },1500); });
+};
 
 refresh();
 
