@@ -394,7 +394,7 @@ function cardsFor(cat){
 function pill(g){ return g ? `<span class="grouptag">${esc(g)}</span>` : ""; }
 function shcatHTML(summaryLabel, cat, group){
   const n = TOOLS.filter(t => (t.cat||"기타")===cat).length;
-  return `<details class="shcat" open>
+  return `<details class="shcat">
     <summary><span class="chev">▸</span>${esc(summaryLabel)}${pill(group)}<span class="ccount">0 / ${n}</span></summary>
     <div class="citems cardgrid">${cardsFor(cat)}</div></details>`;
 }
@@ -404,7 +404,7 @@ listEl.innerHTML = AREAS.map(pair => {
   if(!used.length) return "";
   if(used.length === 1) return shcatHTML(area, used[0], group);   // 과목 1개 밴드 = 밴드 이름으로 한 덩어리
   const total = TOOLS.filter(t => used.includes(t.cat)).length;
-  return `<details class="area" open>
+  return `<details class="area">
     <summary class="areahd"><span class="chev">▸</span>${esc(area)}${pill(group)}<span class="acount">0 / ${total}</span></summary>
     <div class="areabody">${used.map(c => shcatHTML(c, c)).join("")}</div></details>`;
 }).join("")
