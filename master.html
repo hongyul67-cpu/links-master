@@ -249,12 +249,13 @@ const ADMIN_VIEWER = "https://hongyul67-cpu.github.io/links/admin.html"; // 선�
    과목이 1개뿐인 영역은 소제목 없이 영역 이름 아래 카드가 바로 나옵니다. */
 const AREAS = [
   /* [분야 밴드 이름, 그 아래 과목들, (선택)그룹배지] — 전공은 분야별로 나눔 */
-  ["⚙️ 기계 · 설비", ["자동화설비 · 기계", "공조냉동 · 에너지제어", "3D프린터운용기능사"], "전공"],
+  ["📐 제도 · 도면", ["제도 · 도면"], "전공"],
+  ["⚙️ 기계 · 설비", ["자동화설비기능사", "공조냉동 · 에너지제어", "3D프린터운용기능사"], "전공"],
   ["🚁 항공 · 드론", ["드론 제작 (항공드론과)"], "전공"],
   ["🔩 금속 · 재료", ["열처리기능사", "금속재료시험기능사"], "전공"],
   ["⚡ 전기", ["전기기능사"], "전공"],
   ["💻 컴퓨터", ["컴퓨터활용능력 1급", "컴퓨터활용능력 2급"], "전공"],
-  ["🧭 진로 · 직업생활", ["진로 · 직업생활"]],
+  ["🧭 진로 · 취업", ["진로 · 직업생활", "취업 · NCS 직업기초능력"]],
   ["📚 인문 · 기초학습", ["인문 · 기초학습"]],
   ["🌏 글로벌 현장학습 (호주)", ["글로벌 현장학습 (호주)"]],
   ["🧑‍🏫 교사 도우미 (수업 · 행정)", ["교사 도우미 (수업 · 행정)"]],
@@ -273,25 +274,25 @@ const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
    ══════════════════════════════════════════════════════════ */
 const TOOLS = [
   /* ── 전공 · 자동화설비 · 기계 ── */
-  { emoji:"🗂️", name:"제도 마스터 (허브)", desc:"제도 학습도구 14개를 카드 한 장으로 · 교과서 순서 3단계 · 진도 체크 · rc 링크가 모든 도구에 자동 전달", repo:"drawing-master-hub", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비 · 기계", type:"게임", rc:true, dist:"공개" },
-  { emoji:"🧩", name:"블록 뷰 매칭", desc:"정투상도(투상도) 연습 게임", repo:"block-view-matching", cat:"자동화설비 · 기계", type:"게임", rc:true, dist:"공개" },
-  { emoji:"🔍", name:"도면읽기 마스터", desc:"선의 종류 · 치수 읽기 · 기계요소 약도 + 종합시험", repo:"domyeon-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📐", name:"투상도 마스터", desc:"정투상 · 제3각법 — 배우기 + 투상법 종류 / 3면도 배치 / 입체→투상도 3모드 + 종합점검", repo:"tusang-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 + 도전 3종(매칭·탐정·단면종류)", repo:"section-view-explorer", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🪚", name:"단면도 규칙 마스터", desc:"해칭 45°·인접부품 구분 · 절단선/화살표 · 길이방향으로 단면하지 않는 부품(축·키·리브·기어이) — 배우기 + 3모드 + 종합점검", repo:"danmyeon-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📦", name:"전개도 마스터", desc:"전개도를 슬라이더로 직접 펼치고 접기(입체 8종) — 평행선법·방사선법·삼각형법 + 종합시험", repo:"jeongaedo-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📐", name:"3면도 트레이너", desc:"정투상 도형 실습 — 3면도→입체 역추론 / 입체→투상도 / 각법 구분(제3각법·제1각법) + 종합시험", repo:"three-view-trainer", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🎭", name:"특수 투상도 비교기", desc:"같은 물체를 등각·사투상(카발리에/캐비닛)·투시(1·2·3점)로 동시 비교 + 소실점 시각화 + 종합시험", repo:"teuksu-tusang-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"⟂", name:"기계제도 기호 마스터", desc:"표면 거칠기 · 치수공차와 끼워맞춤 · 기하공차 — 배우기 + 문제 + 종합점검", repo:"mechanical-drawing-symbols", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📏", name:"치수기입 마스터", desc:"치수 기입 요소 · 보조기호(φ R □ t C) · 기입 원칙 — 배우기 + 문제 + 종합점검", repo:"dimensioning-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📐", name:"도면 양식·척도 마스터", desc:"A0을 직접 접어 A4까지 · 윤곽선/표제란/중심마크/구역표시/재단마크 · 척도(축척·현척·배척) 계산 + 종합시험", repo:"paper-scale-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"✏️", name:"기본 도법 작도 트레이너", desc:"자와 컴퍼스 작도 8종(수직이등분·수선·n등분·각 2등분·직각 3등분·정육각형·외접원·타원) — 단계 되감기 + 컴퍼스 자리 직접 클릭 + 종합시험", repo:"basic-construction-master", cat:"자동화설비 · 기계", type:"게임", rc:true, dist:"공개" },
-  { emoji:"🔩", name:"재료기호 마스터", desc:"SM45C·SS400·GC250 해독 — 기호 해독기(조각별 뜻) + 조각 끼워 기호 조립 + 부품란 읽기 + 종합시험", repo:"material-symbol-master", cat:"자동화설비 · 기계", type:"게임", rc:true, dist:"공개" },
-  { emoji:"🔥", name:"용접기호 마스터", desc:"실선=화살표 쪽 / 파선=반대쪽 규칙을 실제 이음 단면과 연동 · 기본기호 9종 · 보조기호 · 치수(z a n×l(e) d) + 종합시험", repo:"weld-symbol-master", cat:"자동화설비 · 기계", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"자동화설비 · 기계", type:"문제풀이", rc:true, dist:"공개" },
+  { emoji:"🗂️", name:"제도 마스터 (허브)", desc:"제도 학습도구 14개를 카드 한 장으로 · 교과서 순서 3단계 · 진도 체크 · rc 링크가 모든 도구에 자동 전달", repo:"drawing-master-hub", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비기능사", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🧩", name:"블록 뷰 매칭", desc:"정투상도(투상도) 연습 게임", repo:"block-view-matching", cat:"제도 · 도면", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🔍", name:"도면읽기 마스터", desc:"선의 종류 · 치수 읽기 · 기계요소 약도 + 종합시험", repo:"domyeon-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📐", name:"투상도 마스터", desc:"정투상 · 제3각법 — 배우기 + 투상법 종류 / 3면도 배치 / 입체→투상도 3모드 + 종합점검", repo:"tusang-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"자동화설비기능사", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🧊", name:"단면도 익스플로러", desc:"기계 부품 단면도 원리를 3D로 체험 + 도전 3종(매칭·탐정·단면종류)", repo:"section-view-explorer", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🪚", name:"단면도 규칙 마스터", desc:"해칭 45°·인접부품 구분 · 절단선/화살표 · 길이방향으로 단면하지 않는 부품(축·키·리브·기어이) — 배우기 + 3모드 + 종합점검", repo:"danmyeon-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📦", name:"전개도 마스터", desc:"전개도를 슬라이더로 직접 펼치고 접기(입체 8종) — 평행선법·방사선법·삼각형법 + 종합시험", repo:"jeongaedo-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📐", name:"3면도 트레이너", desc:"정투상 도형 실습 — 3면도→입체 역추론 / 입체→투상도 / 각법 구분(제3각법·제1각법) + 종합시험", repo:"three-view-trainer", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🎭", name:"특수 투상도 비교기", desc:"같은 물체를 등각·사투상(카발리에/캐비닛)·투시(1·2·3점)로 동시 비교 + 소실점 시각화 + 종합시험", repo:"teuksu-tusang-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"⟂", name:"기계제도 기호 마스터", desc:"표면 거칠기 · 치수공차와 끼워맞춤 · 기하공차 — 배우기 + 문제 + 종합점검", repo:"mechanical-drawing-symbols", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📏", name:"치수기입 마스터", desc:"치수 기입 요소 · 보조기호(φ R □ t C) · 기입 원칙 — 배우기 + 문제 + 종합점검", repo:"dimensioning-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📐", name:"도면 양식·척도 마스터", desc:"A0을 직접 접어 A4까지 · 윤곽선/표제란/중심마크/구역표시/재단마크 · 척도(축척·현척·배척) 계산 + 종합시험", repo:"paper-scale-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"✏️", name:"기본 도법 작도 트레이너", desc:"자와 컴퍼스 작도 8종(수직이등분·수선·n등분·각 2등분·직각 3등분·정육각형·외접원·타원) — 단계 되감기 + 컴퍼스 자리 직접 클릭 + 종합시험", repo:"basic-construction-master", cat:"제도 · 도면", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🔩", name:"재료기호 마스터", desc:"SM45C·SS400·GC250 해독 — 기호 해독기(조각별 뜻) + 조각 끼워 기호 조립 + 부품란 읽기 + 종합시험", repo:"material-symbol-master", cat:"제도 · 도면", type:"게임", rc:true, dist:"공개" },
+  { emoji:"🔥", name:"용접기호 마스터", desc:"실선=화살표 쪽 / 파선=반대쪽 규칙을 실제 이음 단면과 연동 · 기본기호 9종 · 보조기호 · 치수(z a n×l(e) d) + 종합시험", repo:"weld-symbol-master", cat:"제도 · 도면", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"자동화설비기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"자동화설비기능사", type:"문제풀이", rc:true, dist:"공개" },
 
   /* ── 전공 · 공조냉동 · 에너지제어 ── */
   { emoji:"❄️", name:"공조냉동 자동제어 마스터", desc:"시퀀스 회로 4종 · 표준 냉동 계통도 · 안전 — 배우기 + 게임 4종 + 졸업고사 20문항 점검", repo:"gongjo-master", cat:"공조냉동 · 에너지제어", type:"게임", rc:true, dist:"공개" },
@@ -407,7 +408,10 @@ function shcatHTML(summaryLabel, cat, group){
     <summary><span class="chev">▸</span>${esc(summaryLabel)}${pill(group)}<span class="ccount">0 / ${n}</span></summary>
     <div class="citems cardgrid">${cardsFor(cat)}</div></details>`;
 }
-listEl.innerHTML = AREAS.map(pair => {
+/* 안전망: AREAS에 아직 없는 새 분야 (있으면 내부·관리용 '앞'에 끼워 넣음) */
+const ORPHANS = [...new Set(TOOLS.map(t => t.cat||"기타"))].filter(c => !CATEGORIES.includes(c));
+
+function areaHTML(pair){
   const area = pair[0], group = pair[2];
   const used = pair[1].filter(c => TOOLS.some(t => (t.cat||"기타")===c));
   if(!used.length) return "";
@@ -416,10 +420,13 @@ listEl.innerHTML = AREAS.map(pair => {
   return `<details class="area">
     <summary class="areahd"><span class="chev">▸</span>${esc(area)}${pill(group)}<span class="acount">0 / ${total}</span></summary>
     <div class="areabody">${used.map(c => shcatHTML(c, c)).join("")}</div></details>`;
-}).join("")
-// 안전망: AREAS에 아직 없는 새 카테고리는 맨 끝에 그대로 노출 (도구가 사라지지 않도록)
-+ [...new Set(TOOLS.map(t => t.cat||"기타"))].filter(c => !CATEGORIES.includes(c))
-    .map(c => shcatHTML(c, c)).join("");
+}
+/* 내부·관리용은 항상 맨 아래 · 미등록 분야(안전망)는 그 바로 앞에 */
+const INTERNAL = "내부 · 관리용 (공유하지 마세요)";
+listEl.innerHTML =
+    AREAS.filter(a => !a[1].includes(INTERNAL)).map(areaHTML).join("")
+  + ORPHANS.map(c => shcatHTML(c, c)).join("")
+  + AREAS.filter(a => a[1].includes(INTERNAL)).map(areaHTML).join("");
 
 const boxes = [...listEl.querySelectorAll("input")];
 const countEl = document.getElementById("count");
@@ -527,15 +534,21 @@ function applySearch(){
   refreshCounts();
 }
 qEl.addEventListener("input", applySearch);
-qClr.onclick = ()=>{ qEl.value=""; applySearch(); qEl.focus(); };
+/* 검색을 지우면(그리고 필터도 '전체'면) 다시 접어서 목록을 깔끔하게 */
+function collapseIfIdle(){
+  if(!qEl.value.trim() && curDist==="전체") listEl.querySelectorAll("details").forEach(d => d.open = false);
+}
+qClr.onclick = ()=>{ qEl.value=""; applySearch(); collapseIfIdle(); qEl.focus(); };
 
 /* 배포범위 필터 (공개/수업/개인) */
 document.getElementById("dfilter").addEventListener("click", function(e){
   const b = e.target.closest("button"); if(!b) return;
   curDist = b.dataset.d;
   this.querySelectorAll("button").forEach(x => x.classList.toggle("on", x===b));
-  if(curDist!=="전체") sections.forEach(d => d.open = true);   // 필터 켜면 펼쳐서 보여줌
+  // 필터 켜면 밴드(area)까지 전부 펼쳐서 결과가 바로 보이게 · '전체'로 돌아오면 다시 접기
+  if(curDist!=="전체") listEl.querySelectorAll("details").forEach(d => d.open = true);
   applySearch();
+  collapseIfIdle();
 });
 
 /* 개별 도구: 링크 복사 · QR (수업 중 화면에 띄우기) */
