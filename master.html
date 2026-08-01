@@ -61,6 +61,8 @@
 
   /* 도구 카드 그리드 */
   .cardgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(228px,1fr));gap:9px;padding:4px 0 8px}
+  /* 과목이 하나뿐인 분야는 .areabody 와 .cardgrid 를 겸하므로 왼쪽 들여쓰기를 지켜 준다 */
+  details.area.solo > .areabody{padding:4px 0 8px 10px}
   .item.card{display:flex;align-items:flex-start;gap:9px;padding:11px 12px;border:1px solid var(--line);
     border-radius:11px;background:var(--card2);cursor:pointer;transition:border-color .12s,background .12s,transform .12s}
   .item.card:hover{border-color:var(--accent);background:var(--card);transform:translateY(-1px)}
@@ -409,6 +411,14 @@ function shcatHTML(summaryLabel, cat, group){
     <summary><span class="chev">▸</span>${esc(summaryLabel)}${pill(group)}<span class="ccount">0 / ${n}</span></summary>
     <div class="citems cardgrid">${cardsFor(cat)}</div></details>`;
 }
+/* 과목이 하나뿐인 분야 — 헤딩은 최상위(.areahd) 형식 그대로 쓰고 카드만 바로 담는다.
+   예전에는 shcatHTML로 그려서 하위 과목처럼 작게 보였다. 분야 분류끼리는 글자 크기가 같아야 한다. */
+function soloHTML(summaryLabel, cat, group){
+  const n = TOOLS.filter(t => (t.cat||"기타")===cat).length;
+  return `<details class="area solo">
+    <summary class="areahd"><span class="chev">▸</span>${esc(summaryLabel)}${pill(group)}<span class="acount">0 / ${n}</span></summary>
+    <div class="areabody citems cardgrid">${cardsFor(cat)}</div></details>`;
+}
 /* 안전망: AREAS에 아직 없는 새 분야 (있으면 내부·관리용 '앞'에 끼워 넣음) */
 const ORPHANS = [...new Set(TOOLS.map(t => t.cat||"기타"))].filter(c => !CATEGORIES.includes(c));
 
@@ -416,7 +426,7 @@ function areaHTML(pair){
   const area = pair[0], group = pair[2];
   const used = pair[1].filter(c => TOOLS.some(t => (t.cat||"기타")===c));
   if(!used.length) return "";
-  if(used.length === 1) return shcatHTML(area, used[0], group);   // 과목 1개 밴드 = 밴드 이름으로 한 덩어리
+  if(used.length === 1) return soloHTML(area, used[0], group);    // 과목 1개 밴드 = 밴드 이름으로 한 덩어리
   const total = TOOLS.filter(t => used.includes(t.cat)).length;
   return `<details class="area">
     <summary class="areahd"><span class="chev">▸</span>${esc(area)}${pill(group)}<span class="acount">0 / ${total}</span></summary>
@@ -426,7 +436,7 @@ function areaHTML(pair){
 const INTERNAL = "내부 · 관리용 (공유하지 마세요)";
 listEl.innerHTML =
     AREAS.filter(a => !a[1].includes(INTERNAL)).map(areaHTML).join("")
-  + ORPHANS.map(c => shcatHTML(c, c)).join("")
+  + ORPHANS.map(c => soloHTML(c, c)).join("")
   + AREAS.filter(a => a[1].includes(INTERNAL)).map(areaHTML).join("");
 
 const boxes = [...listEl.querySelectorAll("input")];
@@ -434,7 +444,8 @@ const countEl = document.getElementById("count");
 const exportBtn = document.getElementById("exportBtn");
 const previewBtn = document.getElementById("previewBtn");
 
-const sections = [...listEl.querySelectorAll("details.shcat")];
+/* 카드를 직접 담고 있는 단위 = 하위 과목(shcat) + 과목이 하나뿐인 분야(area.solo) */
+const sections = [...listEl.querySelectorAll("details.shcat, details.area.solo")];
 
 function picked(){ return boxes.filter(b=>b.checked).map(b => TOOLS[+b.dataset.i]); }
 
@@ -444,11 +455,12 @@ function refreshCounts(){
     const items = [...det.querySelectorAll(".item")];
     const vis   = items.filter(it => it.style.display !== "none");
     const sel   = vis.filter(it => it.querySelector("input").checked).length;
-    const cc = det.querySelector(".ccount");
+    const cc = det.querySelector(".ccount, .acount");
+    const base = cc.classList.contains("acount") ? "acount" : "ccount";
     cc.textContent = `${sel} / ${vis.length}`;
-    cc.className = "ccount" + (sel ? " has" : "");
+    cc.className = base + (sel ? " has" : "");
   });
-  listEl.querySelectorAll("details.area").forEach(a => {
+  listEl.querySelectorAll("details.area:not(.solo)").forEach(a => {
     const items = [...a.querySelectorAll(".item")].filter(it => it.style.display !== "none");
     const sel = items.filter(it => it.querySelector("input").checked).length;
     const ac = a.querySelector(".acount");
@@ -483,7 +495,7 @@ listEl.addEventListener("click", e => {
 /* 선택 버튼 — 검색 중이면 '보이는 것'에만 적용 */
 function visibleBoxes(){
   return boxes.filter(b => b.closest(".item").style.display !== "none"
-                        && b.closest("details.shcat").style.display !== "none");
+                        && b.closest("details.shcat, details.area.solo").style.display !== "none");
 }
 document.getElementById("selAll").onclick  = ()=>{ visibleBoxes().forEach(b=>b.checked=true); refresh(); };
 document.getElementById("selNone").onclick = ()=>{ visibleBoxes().forEach(b=>b.checked=false); refresh(); };
@@ -518,7 +530,8 @@ function applySearch(){
     total += vis;
   });
   // 영역(대분류) — 안에 보이는 과목이 하나도 없으면 통째로 숨김
-  listEl.querySelectorAll("details.area").forEach(a => {
+  // (solo 는 그 자체가 카드를 담는 단위라 위 sections 루프에서 이미 처리됨)
+  listEl.querySelectorAll("details.area:not(.solo)").forEach(a => {
     const anyVis = [...a.querySelectorAll("details.shcat")].some(d => d.style.display !== "none");
     a.style.display = anyVis ? "" : "none";
     if(q && anyVis) a.open = true;
