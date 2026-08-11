@@ -313,12 +313,8 @@ const TOOLS = [
   { emoji:"📝", name:"드론 제작 실습 보고서", desc:"만들기 게임 기록 자동 유입 · 자기평가 · 서술형 4문항 · 사진첨부 · A4 인쇄/PDF", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/report.html", cat:"드론 제작 (항공드론과)", type:"문제풀이", rc:true, dist:"수업" },
   /* 허브 자체는 채점하지 않지만 ?rc= 를 하위 도구 링크에 그대로 물려 주므로 rc 필요 (제도 허브와 동일) */
   { emoji:"🔧", name:"드론 제작 마스터 (허브)", desc:"만들기 게임 3종 + 이론 6차시 + 실습 보고서 전체 모음", repo:"drone-master", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🛩️", name:"드론 1차시 · 드론 개요", desc:"UAV·UAS·RPAS / 고정익·회전익·틸트로터·하이브리드 / 역사 기체 카드", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/01-drone-overview.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🪂", name:"드론 2차시 · 비행 원리", desc:"양력·중력·추력·항력 + 스로틀/엘리베이터/에일러론/러더를 직접 조종해 익히기", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/02-flight-principle.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🔩", name:"드론 3차시 · 드론의 구성", desc:"프레임·FC·ESC·모터·배터리·프로펠러 조립게임 + 센서게임", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/03-drone-structure.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
-  { emoji:"⚖️", name:"드론 4차시 · 법규와 준수사항", desc:"초경량비행장치 / 조종자 증명 1~4종(250g·2kg·7kg·25kg) / 준수사항", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/04-drone-law.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🔋", name:"드론 5차시 · 배터리·센서·검사", desc:"리포 전압 / 센서 5종 / 안전성인증검사 4종 / 비행승인 / 벌칙", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/05-battery-sensor-check.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🗺️", name:"드론 6차시 · 신고번호와 공역", desc:"신고번호 C/N·M/H/P/S / 공역 A~G / 관제·비관제·통제·주의공역", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/06-registration-airspace.html", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
+  /* 이론 1~6차시는 개별로 나열하지 않고 한 줄로 묶는다(허브 안에서 차시별로 바로 열림) */
+  { emoji:"📖", name:"드론 이론 1~6차시 (묶음)", desc:"개요·비행원리·기본구조·법규·배터리/센서·신고번호/공역 — 배우기+게임+학습지+탐구보고서. 각 차시에서 🎓수업용을 누르면 교실 앞 화면용 큰 글씨 슬라이드(정답 가림·타이머)로 전환", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
 
   /* ── 전공 · 3D프린터운용기능사 ── */
   { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
