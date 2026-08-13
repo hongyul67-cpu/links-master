@@ -81,6 +81,7 @@
   .cmeta .tag.t-concept{color:var(--concept);background:color-mix(in srgb,var(--concept) 16%,transparent)}
   .cmeta .tag.t-quiz{color:var(--quiz);background:color-mix(in srgb,var(--quiz) 16%,transparent)}
   .item .rcbadge{font-size:10px;color:var(--ok);border:1px solid var(--ok);border-radius:999px;padding:0 6px;white-space:nowrap}
+  .item .cmbadge{font-size:10px;color:#c084fc;border:1px solid #c084fc;border-radius:999px;padding:0 6px;white-space:nowrap;cursor:help}
   /* 배포 범위 뱃지 · 저작권/개인정보 · 개별 복사·QR */
   .cmeta .dist{font-size:10px;font-weight:800;border-radius:999px;padding:1px 7px;white-space:nowrap}
   .d-공개{color:var(--ok);border:1px solid var(--ok);background:color-mix(in srgb,var(--ok) 14%,transparent)}
@@ -160,6 +161,7 @@
       <button id="selAll">전체 선택</button>
       <button id="selNone">전체 해제</button>
       <button id="selRc">결과수집 되는 것만</button>
+      <button id="selCm">🎓수업모드 되는 것만</button>
       <button id="expAll">분야 모두 펼치기</button>
       <button id="colAll">모두 접기</button>
     </div>
@@ -279,34 +281,34 @@ const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
    ══════════════════════════════════════════════════════════ */
 const TOOLS = [
   /* ── 전공 · 제도 · 도면 (교과서 흐름 순서 / 겹치는 주제는 ①②③ 시리즈로 묶음) ── */
-  { emoji:"🗂️", name:"제도 마스터 (허브)", desc:"제도 학습도구 15개를 카드 한 장으로 · 교과서 순서 3단계(기초→도법→기호·실전) · 진도 체크 · 🎓수업모드 스위치 · rc 링크가 모든 도구에 자동 전달", repo:"drawing-master-hub", ord:1, cat:"제도 ⓪ 모아보기", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🗂️", name:"제도 마스터 (허브)", desc:"제도 학습도구 15개를 카드 한 장으로 · 교과서 순서 3단계(기초→도법→기호·실전) · 진도 체크 · 🎓수업모드 스위치 · rc 링크가 모든 도구에 자동 전달", repo:"drawing-master-hub", ord:1, cat:"제도 ⓪ 모아보기", type:"개념", rc:true, cm:true, dist:"공개" },
 
-  { emoji:"📐", name:"도면 양식·척도 마스터", desc:"【Ⅱ 규격과 통칙】 A0을 직접 접어 A4까지 · 윤곽선/표제란/중심마크/구역표시/재단마크 · 척도(축척·현척·배척) 계산 + 종합시험", repo:"paper-scale-master", ord:1, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🔍", name:"도면읽기 마스터 (선·치수·기계요소 종합)", desc:"【기초 종합】 🖥️ 수업 슬라이드 12장 + 통합 훈련장 — 부서 3곳(선의 종류·치수 읽기·기계요소 약도) 자격증을 모으면 🎯종합 자격시험 개방 · 견습생→마스터 5계급 ※치수는 아래 ‘치수기입 마스터’와 이어서 쓰면 좋습니다", repo:"domyeon-master", ord:2, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📏", name:"치수기입 마스터", desc:"【Ⅱ-4 치수 기입】 치수 기입 요소 · 보조기호(φ R □ t C) · 기입 원칙 — 배우기 + 문제 + 종합점검 ※‘도면읽기 마스터’의 치수 부서를 규칙 쪽으로 더 파고드는 도구", repo:"dimensioning-master", ord:3, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📐", name:"도면 양식·척도 마스터", desc:"【Ⅱ 규격과 통칙】 A0을 직접 접어 A4까지 · 윤곽선/표제란/중심마크/구역표시/재단마크 · 척도(축척·현척·배척) 계산 + 종합시험", repo:"paper-scale-master", ord:1, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"🔍", name:"도면읽기 마스터 (선·치수·기계요소 종합)", desc:"【기초 종합】 🖥️ 수업 슬라이드 12장 + 통합 훈련장 — 부서 3곳(선의 종류·치수 읽기·기계요소 약도) 자격증을 모으면 🎯종합 자격시험 개방 · 견습생→마스터 5계급 ※치수는 아래 ‘치수기입 마스터’와 이어서 쓰면 좋습니다", repo:"domyeon-master", ord:2, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"📏", name:"치수기입 마스터", desc:"【Ⅱ-4 치수 기입】 치수 기입 요소 · 보조기호(φ R □ t C) · 기입 원칙 — 배우기 + 문제 + 종합점검 ※‘도면읽기 마스터’의 치수 부서를 규칙 쪽으로 더 파고드는 도구", repo:"dimensioning-master", ord:3, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, cm:true, dist:"공개" },
 
-  { emoji:"✏️", name:"기본 도법 작도 트레이너", desc:"【Ⅲ-1 평면 도형】 자와 컴퍼스 작도 8종(수직이등분·수선·n등분·각 2등분·직각 3등분·정육각형·외접원·타원) — 단계 되감기 + 컴퍼스 자리 직접 클릭 + 종합시험", repo:"basic-construction-master", ord:1, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"게임", rc:true, dist:"공개" },
-  { emoji:"📐", name:"투상 ① 투상도 마스터 — 개념", desc:"【Ⅲ-2 정투상】 🖥️ 수업 슬라이드 12장(발문·즉석퀴즈) + 정투상·제3각법 배우기 + 투상법 종류 / 3면도 배치 / 입체→투상도 3모드 + 종합점검 · ◀ 여기부터 시작", repo:"tusang-master", ord:2, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📐", name:"투상 ② 3면도 트레이너 — 실습", desc:"【Ⅲ-2 정투상】 3면도→입체 역추론 / 입체→투상도 / 각법 구분(제3각법·제1각법) + 종합시험 · 개념을 배운 뒤 손으로 익히는 단계", repo:"three-view-trainer", ord:3, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🧩", name:"투상 ③ 블록 뷰 매칭 — 게임", desc:"【Ⅲ-2 정투상】 정투상 5뷰 맞추기 게임 · 난이도 5단계(하~마스터) · 실습까지 끝낸 뒤 속도·정확도를 겨루는 단계", repo:"block-view-matching", ord:4, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"게임", rc:true, dist:"공개" },
+  { emoji:"✏️", name:"기본 도법 작도 트레이너", desc:"【Ⅲ-1 평면 도형】 자와 컴퍼스 작도 8종(수직이등분·수선·n등분·각 2등분·직각 3등분·정육각형·외접원·타원) — 단계 되감기 + 컴퍼스 자리 직접 클릭 + 종합시험", repo:"basic-construction-master", ord:1, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"게임", rc:true, cm:true, dist:"공개" },
+  { emoji:"📐", name:"투상 ① 투상도 마스터 — 개념", desc:"【Ⅲ-2 정투상】 🖥️ 수업 슬라이드 12장(발문·즉석퀴즈) + 정투상·제3각법 배우기 + 투상법 종류 / 3면도 배치 / 입체→투상도 3모드 + 종합점검 · ◀ 여기부터 시작", repo:"tusang-master", ord:2, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"📐", name:"투상 ② 3면도 트레이너 — 실습", desc:"【Ⅲ-2 정투상】 3면도→입체 역추론 / 입체→투상도 / 각법 구분(제3각법·제1각법) + 종합시험 · 개념을 배운 뒤 손으로 익히는 단계", repo:"three-view-trainer", ord:3, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"🧩", name:"투상 ③ 블록 뷰 매칭 — 게임", desc:"【Ⅲ-2 정투상】 정투상 5뷰 맞추기 게임 · 난이도 5단계(하~마스터) · 실습까지 끝낸 뒤 속도·정확도를 겨루는 단계", repo:"block-view-matching", ord:4, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"게임", rc:true, cm:true, dist:"공개" },
   /* ⚠ index.html 이 meta refresh 로 넘기면서 ?rc= 를 버려서, 실제 페이지로 직접 연결 (제출이 선생님 시트로 가도록) */
-  { emoji:"🧊", name:"단면 ① 단면도 익스플로러 — 3D 체험", desc:"【Ⅲ-3 단면도】 기계 부품을 3D로 직접 잘라 보며 원리 체험 + 도전 3종(매칭·탐정·단면종류) · 왜 자르는지를 먼저 보여 주는 단계", repo:"section-view-explorer", ord:5, url:"https://hongyul67-cpu.github.io/section-view-explorer/%EB%8B%A8%EB%A9%B4%EB%8F%84.html", cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🪚", name:"단면 ② 단면도 규칙 마스터 — 규칙", desc:"【Ⅲ-3 단면도】 🖥️ 수업 슬라이드 13장 + 해칭 45°·절단선/화살표·길이방향으로 단면하지 않는 부품(축·키·리브·기어이) 3모드 + 종합점검 · 도면 규칙을 익히는 단계", repo:"danmyeon-master", ord:6, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🎭", name:"특수 투상도 비교기", desc:"【Ⅲ-4 특수 투상】 같은 물체를 등각·사투상(카발리에/캐비닛)·투시(1·2·3점)로 동시 비교 + 소실점 시각화 + 종합시험", repo:"teuksu-tusang-master", ord:7, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, dist:"공개" },
-  { emoji:"📦", name:"전개도 마스터", desc:"【Ⅲ-5 전개도】 전개도를 슬라이더로 직접 펼치고 접기(입체 8종) — 평행선법·방사선법·삼각형법 + 종합시험", repo:"jeongaedo-master", ord:8, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🧊", name:"단면 ① 단면도 익스플로러 — 3D 체험", desc:"【Ⅲ-3 단면도】 기계 부품을 3D로 직접 잘라 보며 원리 체험 + 도전 3종(매칭·탐정·단면종류) · 왜 자르는지를 먼저 보여 주는 단계", repo:"section-view-explorer", ord:5, url:"https://hongyul67-cpu.github.io/section-view-explorer/%EB%8B%A8%EB%A9%B4%EB%8F%84.html", cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"🪚", name:"단면 ② 단면도 규칙 마스터 — 규칙", desc:"【Ⅲ-3 단면도】 🖥️ 수업 슬라이드 13장 + 해칭 45°·절단선/화살표·길이방향으로 단면하지 않는 부품(축·키·리브·기어이) 3모드 + 종합점검 · 도면 규칙을 익히는 단계", repo:"danmyeon-master", ord:6, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"🎭", name:"특수 투상도 비교기", desc:"【Ⅲ-4 특수 투상】 같은 물체를 등각·사투상(카발리에/캐비닛)·투시(1·2·3점)로 동시 비교 + 소실점 시각화 + 종합시험", repo:"teuksu-tusang-master", ord:7, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"📦", name:"전개도 마스터", desc:"【Ⅲ-5 전개도】 전개도를 슬라이더로 직접 펼치고 접기(입체 8종) — 평행선법·방사선법·삼각형법 + 종합시험", repo:"jeongaedo-master", ord:8, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
 
-  { emoji:"⟂", name:"기계제도 기호 마스터", desc:"【기계제도 Ⅰ】 표면 거칠기 · 치수공차와 끼워맞춤 · 기하공차 — 배우기 + 문제 + 종합점검", repo:"mechanical-drawing-symbols", ord:1, cat:"제도 ③ 기호 · 재료 · 용접", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🔩", name:"재료기호 마스터", desc:"【기계제도 Ⅰ-9】 SM45C·SS400·GC250 해독 — 기호 해독기(조각별 뜻) + 조각 끼워 기호 조립 + 부품란 읽기 + 종합시험", repo:"material-symbol-master", ord:2, cat:"제도 ③ 기호 · 재료 · 용접", type:"게임", rc:true, dist:"공개" },
-  { emoji:"🔥", name:"용접기호 마스터", desc:"【기계제도 Ⅴ-1】 실선=화살표 쪽 / 파선=반대쪽 규칙을 실제 이음 단면과 연동 · 기본기호 9종 · 보조기호 · 치수(z a n×l(e) d) + 종합시험", repo:"weld-symbol-master", ord:3, cat:"제도 ③ 기호 · 재료 · 용접", type:"개념", rc:true, dist:"공개" },
+  { emoji:"⟂", name:"기계제도 기호 마스터", desc:"【기계제도 Ⅰ】 표면 거칠기 · 치수공차와 끼워맞춤 · 기하공차 — 배우기 + 문제 + 종합점검", repo:"mechanical-drawing-symbols", ord:1, cat:"제도 ③ 기호 · 재료 · 용접", type:"개념", rc:true, cm:true, dist:"공개" },
+  { emoji:"🔩", name:"재료기호 마스터", desc:"【기계제도 Ⅰ-9】 SM45C·SS400·GC250 해독 — 기호 해독기(조각별 뜻) + 조각 끼워 기호 조립 + 부품란 읽기 + 종합시험", repo:"material-symbol-master", ord:2, cat:"제도 ③ 기호 · 재료 · 용접", type:"게임", rc:true, cm:true, dist:"공개" },
+  { emoji:"🔥", name:"용접기호 마스터", desc:"【기계제도 Ⅴ-1】 실선=화살표 쪽 / 파선=반대쪽 규칙을 실제 이음 단면과 연동 · 기본기호 9종 · 보조기호 · 치수(z a n×l(e) d) + 종합시험", repo:"weld-symbol-master", ord:3, cat:"제도 ③ 기호 · 재료 · 용접", type:"개념", rc:true, cm:true, dist:"공개" },
 
   /* ── 전공 · 자동화설비기능사 ── */
-  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비기능사", type:"게임", rc:true, dist:"공개" },
+  { emoji:"📐", name:"자동화설비기능사 실기 도면게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비기능사", type:"게임", rc:true, cm:true, dist:"공개" },
   { emoji:"⚡", name:"시퀀스 · PLC 학습 게임", desc:"시퀀스 · PLC 개념 + 게임", repo:"sequence-plc-master", cat:"자동화설비기능사", type:"개념", rc:true, dist:"공개" },
   { emoji:"📝", name:"자동화설비기능사 필기 CBT", desc:"18회차 1080문항 · 모의고사 · 과목별 학습 · 오답노트", repo:"automation-equipment-exam", cat:"자동화설비기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점", repo:"automation-plc-exam", cat:"자동화설비기능사", type:"문제풀이", rc:true, dist:"공개" },
+  { emoji:"⚙️", name:"자동화설비기능사 실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점 · 🖥️수업 도구(교사용) 별도 제공", repo:"automation-plc-exam", cat:"자동화설비기능사", type:"문제풀이", rc:true, dist:"공개" },
 
   /* ── 전공 · 반도체설비보전기능사 (구 반도체장비유지보수기능사) ── */
-  { emoji:"🔬", name:"반도체설비보전 마스터", desc:"필기 개념 — 배우기 16단원 69쪽(사진·식각·확산·증착·세정CMP·조립 등 공정 전체 + 진공/가스 · 보전이론 · 공유압 · 안전 · 기계 · 전기) + 게임 3종 + 빠른점검 20문항 + 실전 모의고사 60문항·60분", repo:"semicon-maintenance-master", cat:"반도체설비보전기능사", type:"개념", rc:true, dist:"공개" },
+  { emoji:"🔬", name:"반도체설비보전 마스터", desc:"필기 개념 — 배우기 16단원 69쪽(사진·식각·확산·증착·세정CMP·조립 등 공정 전체 + 진공/가스 · 보전이론 · 공유압 · 안전 · 기계 · 전기) + 게임 3종 + 빠른점검 20문항 + 실전 모의고사 60문항·60분 · 🎓수업 슬라이드 9장 + 전자칠판 도구(판서·타이머·번호뽑기·가리개)", repo:"semicon-maintenance-master", cat:"반도체설비보전기능사", type:"개념", rc:true, cm:true, dist:"공개" },
 
   /* ── 전공 · 공조냉동 · 에너지제어 ── */
   { emoji:"❄️", name:"공조냉동 자동제어 마스터", desc:"시퀀스 회로 4종 · 표준 냉동 계통도 · 안전 — 배우기 + 게임 4종 + 졸업고사 20문항 점검", repo:"gongjo-master", cat:"공조냉동 · 에너지제어", type:"게임", rc:true, dist:"공개" },
@@ -400,6 +402,7 @@ function itemHTML(o){
   const t = o.t;
   const tag = t.type ? `<span class="tag ${TYPE_CLASS[t.type]||""}">${esc(t.type)}</span>` : "";
   const rc  = t.rc ? `<span class="rcbadge">결과수집</span>` : "";
+  const cm  = t.cm ? `<span class="cmbadge" title="수업모드 지원 — 큰 화면·리모컨(←→)으로 넘기기·정답 공개 타이밍 조절">🎓수업모드</span>` : "";
   const dist = t.dist ? `<span class="dist d-${esc(t.dist)}">${esc(t.dist)}</span>` : "";
   const cr = t.cr ? `<span class="flag" title="외부 기출·저작물 포함 — 공개 배포 금지, 개별 전달만">⚠️</span>` : "";
   const pv = t.pv ? `<span class="flag" title="교사 실명 등 개인정보 포함 — 공유 금지">🔒</span>` : "";
@@ -408,7 +411,7 @@ function itemHTML(o){
       <span class="cbody">
         <a class="nm" href="${esc(toolUrl(t))}" target="_blank" rel="noopener" title="프로그램 열기">${esc(t.emoji||"🔗")} ${esc(t.name)}</a>
         ${t.desc?`<span class="cdesc">${esc(t.desc)}</span>`:""}
-        <span class="cmeta">${dist}${cr}${pv}${tag}${rc}</span>
+        <span class="cmeta">${dist}${cr}${pv}${tag}${rc}${cm}</span>
         <span class="cacts">
           <button type="button" data-copy="${esc(toolUrl(t))}" title="이 도구 주소만 복사">📋 복사</button>
           <button type="button" data-qr="${o.i}" title="이 도구 QR (수업 중 화면 띄우기)">📱 QR</button>
@@ -515,6 +518,7 @@ function visibleBoxes(){
 document.getElementById("selAll").onclick  = ()=>{ visibleBoxes().forEach(b=>b.checked=true); refresh(); };
 document.getElementById("selNone").onclick = ()=>{ visibleBoxes().forEach(b=>b.checked=false); refresh(); };
 document.getElementById("selRc").onclick   = ()=>{ visibleBoxes().forEach(b=>b.checked=!!TOOLS[+b.dataset.i].rc); refresh(); };
+document.getElementById("selCm").onclick   = ()=>{ visibleBoxes().forEach(b=>b.checked=!!TOOLS[+b.dataset.i].cm); refresh(); };
 document.getElementById("expAll").onclick  = ()=>{ listEl.querySelectorAll("details").forEach(d=>d.open=true); };
 document.getElementById("colAll").onclick  = ()=>{ listEl.querySelectorAll("details").forEach(d=>d.open=false); };
 
@@ -530,6 +534,7 @@ function applySearch(){
   document.getElementById("selAll").textContent  = q ? "검색결과 선택"   : "전체 선택";
   document.getElementById("selNone").textContent = q ? "검색결과 해제"   : "전체 해제";
   document.getElementById("selRc").textContent   = q ? "결과수집만(검색결과)" : "결과수집 되는 것만";
+  document.getElementById("selCm").textContent   = q ? "🎓수업모드만(검색결과)" : "🎓수업모드 되는 것만";
   let total = 0;
   sections.forEach(det => {
     let vis = 0;
