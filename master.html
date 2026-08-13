@@ -311,22 +311,22 @@ const TOOLS = [
   { emoji:"🔬", name:"반도체설비보전 마스터", desc:"필기 개념 — 배우기 16단원 69쪽(사진·식각·확산·증착·세정CMP·조립 등 공정 전체 + 진공/가스 · 보전이론 · 공유압 · 안전 · 기계 · 전기) + 게임 3종 + 빠른점검 20문항 + 실전 모의고사 60문항·60분 · 🎓수업 슬라이드 9장 + 전자칠판 도구(판서·타이머·번호뽑기·가리개)", repo:"semicon-maintenance-master", cat:"반도체설비보전기능사", type:"개념", rc:true, cm:true, dist:"공개" },
 
   /* ── 전공 · 공조냉동 · 에너지제어 ── */
-  { emoji:"❄️", name:"공조냉동 자동제어 마스터", desc:"시퀀스 회로 4종 · 표준 냉동 계통도 · 안전 — 배우기 + 게임 4종 + 졸업고사 20문항 점검", repo:"gongjo-master", cat:"공조냉동 · 에너지제어", type:"게임", rc:true, dist:"공개" },
+  { emoji:"❄️", name:"공조냉동 자동제어 마스터", desc:"시퀀스 회로 4종 · 표준 냉동 계통도 · 안전 — 배우기 + 게임 5종(회로·사이클·부품·계통도 위치찾기·안전) + 졸업고사 점검(빠른 20문항 / 전체 34문항)", repo:"gongjo-master", cat:"공조냉동 · 에너지제어", type:"게임", rc:true, dist:"공개" },
   { emoji:"🌬️", name:"공기조화설비 개념게임", desc:"교과서 6단원(기초·부하·설비·시스템·자동제어·시공) — 배우기 카드 + 짝맞추기·분류·순서맞추기 4모드", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/game.html", cat:"공조냉동 · 에너지제어", type:"게임", dist:"공개" },
   { emoji:"📝", name:"공기조화설비 점검 CBT", desc:"단원·문항 수 선택 · 자동 채점 · 오답노트 · 결과 제출 (문제 44)", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/check.html", cat:"공조냉동 · 에너지제어", type:"문제풀이", rc:true, dist:"수업" },
 
   /* ── 전공 · 드론 제작 (항공드론과) ── */
   { emoji:"🚁", name:"드론 만들기 게임 · 픽스호크", desc:"부품도감→프레임·모터 조립→픽스호크 결선→프로펠러→조종기 세팅→미션플래너 보정→가상 시험비행", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-pixhawk.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
   { emoji:"🛩️", name:"드론 만들기 게임 · 아두이노 나노", desc:"FC기판 핀 결선표 · 3D출력 설정 · 모터/ESC 조립 · MultiWii 세팅 · ESC보정·안전점검", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-arduino.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
-  { emoji:"📦", name:"드론 임무장치 만들기", desc:"에어 드롭 장치·2축 짐벌 — 인벤터 모델링 순서·출력 설정·서보 제어로 실제 투하", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-mission-device.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
+  { emoji:"📦", name:"드론 임무장치 만들기", desc:"에어 드롭 장치·2축 짐벌 — 인벤터 모델링 순서·출력 설정·서보 제어로 실제 투하", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-mission-device.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, cm:true, dist:"공개" },
   { emoji:"📝", name:"드론 제작 실습 보고서", desc:"만들기 게임 기록 자동 유입 · 자기평가 · 서술형 4문항 · 사진첨부 · A4 인쇄/PDF", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/report.html", cat:"드론 제작 (항공드론과)", type:"문제풀이", rc:true, dist:"수업" },
   /* 허브 자체는 채점하지 않지만 ?rc= 를 하위 도구 링크에 그대로 물려 주므로 rc 필요 (제도 허브와 동일) */
   { emoji:"🔧", name:"드론 제작 마스터 (허브)", desc:"만들기 게임 3종 + 이론 6차시 + 실습 보고서 전체 모음", repo:"drone-master", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
   /* 이론 1~6차시는 개별로 나열하지 않고 한 줄로 묶는다(허브 안에서 차시별로 바로 열림) */
-  { emoji:"📖", name:"드론 이론 1~6차시 (묶음)", desc:"개요·비행원리·기본구조·법규·배터리/센서·신고번호/공역 — 배우기+게임+학습지+탐구보고서. 각 차시에서 🎓수업용을 누르면 교실 앞 화면용 큰 글씨 슬라이드(정답 가림·타이머)로 전환", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
+  { emoji:"📖", name:"드론 이론 1~6차시 (묶음)", desc:"개요·비행원리·기본구조·법규·배터리/센서·신고번호/공역 — 배우기+게임+학습지+탐구보고서. 각 차시에서 🎓수업용을 누르면 교실 앞 화면용 큰 글씨 슬라이드(정답 가림·타이머)로 전환", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, cm:true, dist:"공개" },
 
   /* ── 전공 · 3D프린터운용기능사 ── */
-  { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 기출 92문항 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 자작 문제은행 378문항(4개 은행 · 계산형 자동생성 포함) · 주제별 학습 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
 
   /* ── 전공 · 전기기능사 ── */
   { emoji:"⚡", name:"전기기능사 필기 CBT", desc:"📅 16차시 수업 진행안(차시별 학습목표·45분 진행순서·쓸 그림/이론/계산·과제, 버튼으로 즉시 이동) · 🖼️ 그림으로 개념 잡기 55장(출제기준 20개 항목 전부·기출 대조 검증) · 🧮 계산 문제 풀이 24유형(교재에 없는 수식 해설을 단계별로·실수/검산 팁) · 🏫 수업 모드(프로젝터용 큰 글씨·타이머·정답 공개·학생 번호 뽑기·단축키) · 🤝 함께 풀기(힌트=관련 이론·오답 2개 지우기·차등 점수) · 핵심이론 요약 25쪽(확대뷰어) · 반복기출 500제 · 기출 24회차 1,440문항 CBT · 유형별 랜덤 · 출제기준 항목별 · 약점 집중 · 오답노트", repo:"electrician-written-exam", cat:"전기기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
@@ -342,12 +342,12 @@ const TOOLS = [
 
   /* ── 전공 · 컴퓨터활용능력 1급 ── */
   { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"컴퓨터활용능력 1급", type:"게임", rc:true, dist:"수업" },
-  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"실전 60문항 모의고사 · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"모의고사 4종(실전 60문항60분·하프 30문항·컴퓨터일반만·스프레드시트만 각 20문항) · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업", cr:true },
   { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·배열수식 등)", repo:"comhwal-excel", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업" },
   { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·집계 등)", repo:"comhwal-access", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업" },
 
   /* ── 전공 · 컴퓨터활용능력 2급 ── */
-  { emoji:"🎓", name:"컴활 2급 필기 개념게임", desc:"컴퓨터일반·스프레드시트 2과목 16단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal2", cat:"컴퓨터활용능력 2급", type:"게임", rc:true, dist:"수업" },
+  { emoji:"🎓", name:"컴활 2급 필기 개념게임", desc:"컴퓨터일반·스프레드시트 2과목 16단원 · 카드/스피드퀴즈/OX/매칭 4모드 + 모의고사 3종(실전 40문항40분·미니 20문항·전체 총정리) + 시험 직전 핵심 요약", repo:"comhwal2", cat:"컴퓨터활용능력 2급", type:"게임", rc:true, dist:"수업" },
   { emoji:"📝", name:"컴활 2급 필기 CBT", desc:"실제 기출 320문항(5회차 + 자주출제 120선) · 40문항 40분 · 과락판정·오답노트", repo:"comhwal2-cbt", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true, dist:"수업", cr:true },
   { emoji:"📊", name:"컴활 2급 실기 함수 연습소", desc:"실제 엑셀 함수를 직접 입력하면 수식엔진이 계산해 채점 (IF·VLOOKUP·DSUM 등)", repo:"comhwal2-excel", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true, dist:"수업" },
 
@@ -359,7 +359,7 @@ const TOOLS = [
   { emoji:"📝", name:"NCS 문제풀이 연습", desc:"2,265문항 랜덤 출제 → 자체 채점 → 오답 해설 복습 · 출제방식 4종(랜덤/틀린 문항/⭐별표/안 푼 문항)으로 내 오답만 골라 풀기 · 자작 539문항은 바로 풀 수 있고, 실전 1,726문항은 주간 8자리 코드 필요(교사용 암호로 열면 그 주 코드가 화면에 표시, 5년치 내장)", repo:"ncs-practice", cat:"취업 · NCS 직업기초능력", type:"문제풀이", rc:true, dist:"수업", cr:true },
 
   /* ── 인문 · 기초학습 ── */
-  { emoji:"📊", name:"기초학력 진단 도구", desc:"중학생 국·영·수 60문항 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"인문 · 기초학습", type:"문제풀이", rc:true, dist:"수업", cr:true },
+  { emoji:"📊", name:"기초학력 진단 도구", desc:"중1~고3 수준 국어·영어·수학 학습·진단 — 학년·과목 선택(복수) · 과목당 20문항 매번 랜덤 출제(3과목 60문항) · 자동 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"인문 · 기초학습", type:"문제풀이", rc:true, dist:"수업", cr:true },
   { emoji:"🏫", name:"사회생활 수업 학습 도구", desc:"사회생활 수업용 학습 도구 모음", repo:"social-life-tools", cat:"인문 · 기초학습", dist:"공개" },
 
   /* ── 글로벌 현장학습 (호주) ── */
