@@ -135,7 +135,30 @@
   #qrImg img{width:100%;height:100%;image-rendering:pixelated;display:block}
   a.dl{background:var(--accent);color:#fff;border-radius:8px;padding:6px 11px;font-size:12.5px;
     font-weight:700;text-decoration:none;display:inline-block}
-</style>
+  .verbox{max-width:960px;margin:14px auto 40px;padding:11px 16px;font-size:12px;color:var(--dim);
+    background:var(--card);border:1px solid var(--line);border-radius:11px;
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .verbox b{color:var(--tx);font-weight:700}
+  .verbox .vtag{background:var(--card2);border:1px solid var(--line);border-radius:999px;
+    padding:1px 9px;font-weight:700;color:var(--accent)}
+  .verbox a{color:var(--accent);text-decoration:none;margin-left:auto}
+  .verbox a:hover{text-decoration:underline}
+/* 주간 학생 코드 카드 (페이지 맨 아래) — 허브 어두운 배경에 맞춘다 */
+  .wkbox{max-width:960px;margin:22px auto 10px;padding:16px 18px;
+    background:var(--card);border:1px solid var(--line);border-radius:13px}
+  .wkbox.off{display:none}
+  .wkhead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .wkttl{font-size:15px;font-weight:800;color:var(--tx)}
+  .wksub{margin-top:3px;font-size:12.5px;color:var(--dim)}
+  .wkcode{font-size:32px;font-weight:900;letter-spacing:3px;color:var(--warn);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  .wkrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .wkrow button{padding:9px 14px;font-size:13px;font-weight:700;border-radius:10px;border:0;
+    background:var(--accent);color:#fff;cursor:pointer;font-family:inherit}
+  .wkrow button.ghost{background:var(--card2);color:var(--tx);border:1px solid var(--line)}
+  .wkrow button:hover{filter:brightness(1.1)}
+  .wknote{margin:12px 0 0;font-size:12px;color:var(--dim);line-height:1.6}
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -229,6 +252,32 @@
   </div>
 </div>
 
+<!-- 주간 학생 코드 (배포용) — 잠금이 풀린 뒤 아래쪽에서 언제든 다시 본다 -->
+<div class="wkbox" id="wkbox">
+  <div class="wkhead">
+    <div>
+      <div class="wkttl">🔑 이번 주 학생 코드</div>
+      <div class="wksub" id="wkrange">–</div>
+    </div>
+    <div class="wkcode" id="wkcode">– – – –</div>
+  </div>
+  <div class="wkrow">
+    <button id="wkcopy">코드 복사</button>
+    <button class="ghost" id="wkmore">3개월치 보기</button>
+  </div>
+  <p class="wknote">이 8자리 하나로 <b>공업일반 · 이 허브 · 반도체 · NCS</b> 가 모두 열립니다.
+    그 주 월요일부터 <b>7일</b>만 통합니다. 교사용 암호를 알려 주면 기간 제한 없이 열리니 주의하세요.</p>
+</div>
+
+<!-- 버전 · 점검 정보 -->
+<div class="verbox">
+  <span class="vtag" id="vtag">–</span>
+  <span>도구 <b id="vcount">–</b>개 · 마지막 전수 점검 <b>2026-08-21</b>
+    (설명·문항수·링크 유효성 확인)</span>
+  <a href="https://github.com/hongyul67-cpu/links-master/blob/main/CHANGELOG.md"
+     target="_blank" rel="noopener">변경 이력 보기 →</a>
+</div>
+
 <!-- 개별 도구 QR (수업 중 화면에 바로 띄우기) -->
 <div class="modal" id="modal">
   <div class="mbox">
@@ -242,7 +291,7 @@
   </div>
 </div>
 
-<script src="lock.js?v=36cdd5d4"></script>
+<script src="lock.js?v=5a59526e"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="text/plain" id="hubsrc">
@@ -861,13 +910,56 @@ document.getElementById("adminCopy").onclick = function(){
 </script>
 
 <script>
+verFill();   // 빌드 표식은 잠금과 무관하니 열자마자 채운다
+
 /* 잠금이 풀리기 전에는 위 본체가 돌지 않는다(type="text/plain").
-   암호가 맞으면 그때 진짜 script 로 바꿔 넣어 실행시킨다. */
-HubLock.mount(function(){
+   암호가 맞으면 그때 진짜 script 로 바꿔 넣어 실행시킨다.
+
+   ⚠ lock.js 를 못 불러오면 HubLock 이 없어 여기서 예외가 난다.
+      그러면 이 블록의 나머지(버전 표시 등)까지 통째로 죽으므로,
+      잠금과 무관한 것을 먼저 실행하고 mount 는 감싸 둔다.
+      (잠금은 fail-closed — HubLock 이 없으면 목록은 잠긴 채로 남는다) */
+if (typeof HubLock === "undefined") {
+  console.error("lock.js 를 불러오지 못했습니다 — 목록은 잠긴 상태로 둡니다.");
+} else HubLock.mount(function(){
   var el = document.createElement("script");
   el.textContent = document.getElementById("hubsrc").textContent;
   document.body.appendChild(el);
+  wkFill();                       // 아래쪽 주간 코드 카드 채우기
+  verFill();                      // 버전·점검 정보 채우기
 });
+
+/* 버전 표시 — 빌드 표식(lock.js?v=)과 실제 도구 수를 그대로 읽어 쓴다.
+   숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
+   함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
+function verFill(){
+  try{
+    var m = /lock\.js\?v=([A-Za-z0-9]+)/.exec(document.documentElement.innerHTML);
+    document.getElementById("vtag").textContent = "build " + (m ? m[1] : "—");
+    var n = document.querySelectorAll("#list .item.card").length;
+    document.getElementById("vcount").textContent = n ? n : "—";
+  }catch(e){}
+}
+
+
+/* 주간 학생 코드 카드 — 교사용으로 열었을 때만 보인다.
+   학생 코드로 들어온 사람에게 다음 주 코드까지 보여 주면 안 되기 때문이다. */
+function wkFill(){
+  var box = document.getElementById("wkbox");
+  HubLock.codes().then(function(c){
+    if(!c){ box.classList.add("off"); return; }      // 교사용이 아니면 감춘다
+    document.getElementById("wkcode").textContent = c.code;
+    document.getElementById("wkrange").textContent = c.from + " ~ " + c.to + " 까지";
+    document.getElementById("wkcopy").onclick = function(){
+      var b = this, old = b.textContent;
+      var done = function(){ b.textContent = "복사됨 ✓"; setTimeout(function(){ b.textContent = old; }, 1400); };
+      if(navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(c.code.replace(/\s/g,"")).then(done, done);
+      else done();
+    };
+    document.getElementById("wkmore").onclick = function(){ HubLock.panel(); };
+  }).catch(function(){ box.classList.add("off"); });
+}
 </script>
 </body>
 </html>

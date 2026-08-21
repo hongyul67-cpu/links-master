@@ -134,30 +134,95 @@ window.HubLock = (function () {
       });
   }
 
-  function showCodes() {
-    var ms = b64(info.ms);
-    var start = new Date(info.epoch + 'T00:00:00');
+  /* 배포용으로 미리 불러 줘야 하므로 3개월(13주)치를 보여 준다.
+     교실 화면에 띄울 때는 다음 주 코드가 보이지 않게 접어 둘 수 있다. */
+  var WEEKS_SHOWN = 13;
+
+  function codeRows(ms, n) {
     var thisMon = monday(new Date());
     var mons = [];
-    for (var i = 0; i < 8; i++) mons.push(addDays(thisMon, i * 7));
-    Promise.all(mons.map(function (m) { return weekCode(ms, m); })).then(function (cs) {
-      var rows = mons.map(function (m, i) {
-        var e = addDays(m, 7);
-        return '<tr' + (i === 0 ? ' class="now"' : '') + '><td>' + iso(m).slice(5) + ' ~ ' + iso(e).slice(5) +
-               '</td><td class="c">' + pretty(cs[i]) + '</td></tr>';
-      }).join('');
+    for (var i = 0; i < n; i++) mons.push(addDays(thisMon, i * 7));
+    return Promise.all(mons.map(function (m) { return weekCode(ms, m); }))
+      .then(function (cs) {
+        return mons.map(function (m, i) {
+          return { mon: m, end: addDays(m, 7), code: cs[i], now: i === 0 };
+        });
+      });
+  }
+
+  function tableHTML(rows, folded) {
+    return '<table class="codes"><tbody>' + rows.map(function (r, i) {
+      var hide = folded && i > 0;
+      return '<tr class="' + (r.now ? 'now' : '') + (hide ? ' fold' : '') + '">' +
+             '<td>' + (i + 1) + '주</td>' +
+             '<td>' + iso(r.mon).slice(5) + ' ~ ' + iso(r.end).slice(5) + '</td>' +
+             '<td class="c">' + (hide ? '••••&nbsp;••••' : pretty(r.code)) + '</td>' +
+             '<td><button class="cp" data-code="' + r.code + '">복사</button></td></tr>';
+    }).join('') + '</tbody></table>';
+  }
+
+  function wireCopy(root) {
+    Array.prototype.forEach.call(root.querySelectorAll('.cp'), function (b) {
+      b.onclick = function (e) {
+        e.stopPropagation();
+        var v = b.getAttribute('data-code'), old = b.textContent;
+        var done = function () { b.textContent = '됐어요'; setTimeout(function () { b.textContent = old; }, 1200); };
+        if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(v).then(done, done);
+        else done();
+      };
+    });
+  }
+
+  function showCodes() {
+    var ms = b64(info.ms);
+    codeRows(ms, WEEKS_SHOWN).then(function (rows) {
       var box = $('gimBox');
       box.innerHTML =
         '<div class="ico">🧑‍🏫</div>' +
         '<h1>이번 주 학생 코드</h1>' +
-        '<div class="bigcode">' + pretty(cs[0]) + '</div>' +
-        '<p class="sub">' + iso(mons[0]) + ' ~ ' + iso(addDays(mons[0], 7)) + ' 까지 씁니다</p>' +
-        '<table class="codes"><tbody>' + rows + '</tbody></table>' +
+        '<div class="bigcode">' + pretty(rows[0].code) + '</div>' +
+        '<p class="sub">' + iso(rows[0].mon) + ' ~ ' + iso(rows[0].end) + ' 까지 씁니다</p>' +
+        '<div class="foldwarn" id="gimFold">교실 화면이면 <b>접어 두세요</b> · 눌러서 3개월치 보기</div>' +
+        '<div class="codewrap">' + tableHTML(rows, true) + '</div>' +
         '<button id="gimGo2">목록 열기</button>' +
         '<div class="note">학생에게는 이 8자리 숫자만 알려 주세요.<br>' +
         '교사용 암호를 알려 주면 기간 제한 없이 열립니다.</div>';
+      var folded = true;
+      $('gimFold').onclick = function () {
+        folded = !folded;
+        box.querySelector('.codewrap').innerHTML = tableHTML(rows, folded);
+        wireCopy(box);
+        $('gimFold').innerHTML = folded
+          ? '교실 화면이면 <b>접어 두세요</b> · 눌러서 3개월치 보기'
+          : '3개월치를 보고 있습니다 · 눌러서 접기';
+      };
+      wireCopy(box);
       $('gimGo2').onclick = enter;
     }).catch(enter);
+  }
+
+  /* 잠금이 풀린 뒤에도 코드를 다시 꺼내 볼 수 있게 (배포용) */
+  function panel() {
+    if (!info || info.role !== 'teacher' || !info.ms) return false;
+    var ms = b64(info.ms);
+    codeRows(ms, WEEKS_SHOWN).then(function (rows) {
+      var ov = document.createElement('div');
+      ov.id = 'gimPanel';
+      ov.innerHTML = '<div id="gimBox">' +
+        '<div class="ico">🔑</div><h1>주간 학생 코드</h1>' +
+        '<div class="bigcode">' + pretty(rows[0].code) + '</div>' +
+        '<p class="sub">이번 주 · ' + iso(rows[0].mon) + ' ~ ' + iso(rows[0].end) + '</p>' +
+        '<div class="codewrap">' + tableHTML(rows, false) + '</div>' +
+        '<button id="gimClose">닫기</button>' +
+        '<div class="note">한 코드로 공업일반 · 허브 · 반도체 · NCS 가 모두 열립니다.<br>' +
+        '코드는 그 주 월요일부터 7일간만 통합니다.</div></div>';
+      document.body.appendChild(ov);
+      wireCopy(ov);
+      var close = function () { ov.remove(); };
+      ov.querySelector('#gimClose').onclick = close;
+      ov.onclick = function (e) { if (e.target === ov) close(); };
+    });
+    return true;
   }
 
   function enter() {
@@ -200,6 +265,15 @@ window.HubLock = (function () {
     '#gimBox table.codes td{padding:6px 8px;border-top:1px solid #2e2150;color:#9b8fc4;text-align:left}' +
     '#gimBox table.codes td.c{text-align:right;color:#cfc4f0;font-weight:700;font-variant-numeric:tabular-nums}' +
     '#gimBox table.codes tr.now td{color:#ffd76a}' +
+    '#gimBox table.codes tr.fold td.c{color:#5d5285;letter-spacing:1px}' +
+    '#gimBox .codewrap{max-height:38vh;overflow:auto;margin:4px 0 2px}' +
+    '#gimBox .foldwarn{margin:12px 0 4px;font-size:12.5px;color:#9b8fc4;cursor:pointer;' +
+      'background:#241a44;border:1px solid #3b2a63;border-radius:10px;padding:8px 10px}' +
+    '#gimBox button.cp{background:#2e2150;border:1px solid #4a3878;color:#cfc4f0;border-radius:8px;' +
+      'padding:3px 8px;font-size:11.5px;cursor:pointer;font-family:inherit}' +
+    '#gimBox button.cp:hover{background:#3b2a63}' +
+    '#gimPanel{position:fixed;inset:0;z-index:99998;display:flex;align-items:center;justify-content:center;' +
+      'background:rgba(9,6,20,.86);padding:20px;overflow:auto}' +
     '@keyframes gimShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}' +
     'body.locked{overflow:hidden}';
 
@@ -245,11 +319,16 @@ window.HubLock = (function () {
   }
 
   /* 교사용으로 열려 있을 때 그 주 코드를 다시 보고 싶을 때 쓴다 */
+  /* 이번 주 코드와 기간. 교사용으로 열었을 때만 값을 준다 —
+     학생 코드로 들어온 사람에게 다음 주 코드까지 보여 주면 안 되기 때문이다. */
   function codes() {
-    if (!info || info.role !== 'teacher') return Promise.resolve(null);
-    return weekCode(b64(info.ms), monday(new Date())).then(pretty);
+    if (!info || info.role !== 'teacher' || !info.ms) return Promise.resolve(null);
+    var mon = monday(new Date());
+    return weekCode(b64(info.ms), mon).then(function (c) {
+      return { code: pretty(c), raw: c, from: iso(mon), to: iso(addDays(mon, 7)) };
+    });
   }
 
-  return { mount: mount, open: open, forget: forget, codes: codes,
+  return { mount: mount, open: open, forget: forget, codes: codes, panel: panel,
            role: function () { return info && info.role; } };
 })();
