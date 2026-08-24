@@ -51,8 +51,29 @@
       /links-master/ 로 들어가 전체 목록을 보게 돼요.
 
 ■ 새 도구를 만들면
-  master.html 안의 TOOLS 목록에 한 줄 추가 → 저장 → git push
-  rc:true 를 넣으면 "결과수집" 배지가 붙고 [결과수집 되는 것만] 선택에 포함됩니다.
+  ※ 목록은 이제 master.html 안이 아니라 별도 파일에 있습니다.
+    내 PC의 tools.js (평문, .gitignore 에 있어 절대 안 올라감)  ← 여기에 한 줄 추가
+    올라가는 것은 암호화본 tools.enc 뿐입니다.
+
+  1) tools.js 에 카드 한 줄 추가
+  2) python build_lock.py --pw <교사용 암호>     ← tools.enc 다시 만들기
+  3) git add -A ; git commit -m "..." ; git push
+
+  한 줄 형식:
+    { emoji:"🔧", name:"이름", desc:"설명",
+      repo:"저장소이름",          // 또는 url:"https://..." (둘 중 하나)
+      cat:"과목 이름", type:"개념", ord:1, dist:"공개", rc:true, cm:true }
+
+    repo  → https://<계정>.github.io/<repo>/ 로 열리고, ?rc= 가 자동으로 붙습니다.
+    url   → 그 주소를 그대로 엽니다. rc 는 안 붙습니다(교사용 도구는 이걸 쓰세요).
+    cat   → master.html 의 AREAS 에 있는 과목 이름과 정확히 같아야 합니다.
+    dist  → 공개 / 수업 / 개인   (배포 범위 필터)
+    rc:true → "결과수집" 배지 + [결과수집 되는 것만] 선택에 포함
+    cm:true → "🎓수업모드" 배지
+    cr:true → ⚠️ 외부 기출 포함 · pv:true → 🔒 개인정보 포함
+
+  ※ tools.js 를 잃어버렸다면 tools.enc 에서 되살릴 수 있습니다.
+    교사용 암호로 풀면 목록이 그대로 나옵니다 (build_lock.py 와 같은 방식).
   (공개 허브 index.html 은 예전 그대로 살아있음 — 굳이 안 맞춰도 됩니다)
 
 ■ 수정 저장 / 다른 PC에서 받기
