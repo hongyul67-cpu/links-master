@@ -135,7 +135,30 @@
   #qrImg img{width:100%;height:100%;image-rendering:pixelated;display:block}
   a.dl{background:var(--accent);color:#fff;border-radius:8px;padding:6px 11px;font-size:12.5px;
     font-weight:700;text-decoration:none;display:inline-block}
-</style>
+  .verbox{max-width:960px;margin:14px auto 40px;padding:11px 16px;font-size:12px;color:var(--dim);
+    background:var(--card);border:1px solid var(--line);border-radius:11px;
+    display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .verbox b{color:var(--tx);font-weight:700}
+  .verbox .vtag{background:var(--card2);border:1px solid var(--line);border-radius:999px;
+    padding:1px 9px;font-weight:700;color:var(--accent)}
+  .verbox a{color:var(--accent);text-decoration:none;margin-left:auto}
+  .verbox a:hover{text-decoration:underline}
+/* 주간 학생 코드 카드 (페이지 맨 아래) — 허브 어두운 배경에 맞춘다 */
+  .wkbox{max-width:960px;margin:22px auto 10px;padding:16px 18px;
+    background:var(--card);border:1px solid var(--line);border-radius:13px}
+  .wkbox.off{display:none}
+  .wkhead{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .wkttl{font-size:15px;font-weight:800;color:var(--tx)}
+  .wksub{margin-top:3px;font-size:12.5px;color:var(--dim)}
+  .wkcode{font-size:32px;font-weight:900;letter-spacing:3px;color:var(--warn);
+    font-variant-numeric:tabular-nums;white-space:nowrap}
+  .wkrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .wkrow button{padding:9px 14px;font-size:13px;font-weight:700;border-radius:10px;border:0;
+    background:var(--accent);color:#fff;cursor:pointer;font-family:inherit}
+  .wkrow button.ghost{background:var(--card2);color:var(--tx);border:1px solid var(--line)}
+  .wkrow button:hover{filter:brightness(1.1)}
+  .wknote{margin:12px 0 0;font-size:12px;color:var(--dim);line-height:1.6}
+  </style>
 </head>
 <body>
 <div class="wrap">
@@ -229,6 +252,32 @@
   </div>
 </div>
 
+<!-- 주간 학생 코드 (배포용) — 잠금이 풀린 뒤 아래쪽에서 언제든 다시 본다 -->
+<div class="wkbox" id="wkbox">
+  <div class="wkhead">
+    <div>
+      <div class="wkttl">🔑 이번 주 학생 코드</div>
+      <div class="wksub" id="wkrange">–</div>
+    </div>
+    <div class="wkcode" id="wkcode">– – – –</div>
+  </div>
+  <div class="wkrow">
+    <button id="wkcopy">코드 복사</button>
+    <button class="ghost" id="wkmore">3개월치 보기</button>
+  </div>
+  <p class="wknote">이 8자리 하나로 <b>공업일반 · 이 허브 · 반도체 · NCS</b> 가 모두 열립니다.
+    그 주 월요일부터 <b>7일</b>만 통합니다. 교사용 암호를 알려 주면 기간 제한 없이 열리니 주의하세요.</p>
+</div>
+
+<!-- 버전 · 점검 정보 -->
+<div class="verbox">
+  <span class="vtag" id="vtag">–</span>
+  <span>도구 <b id="vcount">–</b>개 · 마지막 전수 점검 <b>2026-08-21</b>
+    (설명·문항수·링크 유효성 확인)</span>
+  <a href="https://github.com/hongyul67-cpu/links-master/blob/main/CHANGELOG.md"
+     target="_blank" rel="noopener">변경 이력 보기 →</a>
+</div>
+
 <!-- 개별 도구 QR (수업 중 화면에 바로 띄우기) -->
 <div class="modal" id="modal">
   <div class="mbox">
@@ -242,9 +291,10 @@
   </div>
 </div>
 
+<script src="lock.js?v=0db10a7d"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
-<script>
+<script type="text/plain" id="hubsrc">
 const GH_USER = "hongyul67-cpu";
 const VIEWER  = "https://hongyul67-cpu.github.io/links/s.html";   // 공유 모음 뷰어(공개 저장소)
 const ADMIN_VIEWER = "https://hongyul67-cpu.github.io/links/admin.html"; // 선생님 설정 페이지(links 저장소 = 학생용 안전 위치)
@@ -262,7 +312,7 @@ const AREAS = [
   ["⚡ 전기", ["전기기능사"], "전공"],
   ["🚄 철도", ["철도교통안전관리자"], "전공"],
   ["💻 컴퓨터", ["컴퓨터활용능력 1급", "컴퓨터활용능력 2급"], "전공"],
-  ["🧭 진로 · 취업", ["진로 · 직업생활", "취업 · NCS 직업기초능력", "AI 활용 (인공지능과 직업생활)"]],
+  ["🧭 진로 · 취업", ["진로 · 직업생활", "인공지능 활용 (AI와 직업생활)", "취업 · NCS 직업기초능력"]],
   ["📚 인문 · 기초학습", ["인문 · 기초학습"]],
   ["🌏 글로벌 현장학습 (호주)", ["글로벌 현장학습 (호주)"]],
   ["🧑‍🏫 교사 도우미 (수업 · 행정)", ["교사 도우미 (수업 · 행정)"]],
@@ -275,140 +325,8 @@ const CATEGORIES = [];
 AREAS.forEach(function(a){ a[1].forEach(function(c){ CAT_AREA[c]=a[0]; CATEGORIES.push(c); }); });
 const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
 
-/* ══════════════════════════════════════════════════════════
-   전체 도구 목록 (공개 허브 index.html 과 동일하게 유지하세요)
-   rc:true = 결과수집(선생님께 제출) 되는 도구
-   ══════════════════════════════════════════════════════════ */
-const TOOLS = [
-  /* ── 전공 · 제도 · 도면 (교과서 흐름 순서 / 겹치는 주제는 ①②③ 시리즈로 묶음) ── */
-  { emoji:"🗂️", name:"제도 전체 모아보기", desc:"제도 학습도구 15개를 카드 한 장으로 · 교과서 순서 3단계(기초→도법→기호·실전) · 진도 체크 · 🎓수업모드 스위치 · rc 링크가 모든 도구에 자동 전달", repo:"drawing-master-hub", ord:1, cat:"제도 ⓪ 모아보기", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"🖥️", name:"제도 · 전자칠판 수업자료", desc:"앞에서 설명할 때 쓰는 슬라이드 12장 — 도면 양식·척도·선의 종류·치수기입 / 제3각법·3면도·단면도·특수투상·전개도 / 치수보조기호·재료기호·용접기호 · 요점 → 발문 → 퀴즈 → 정답 순서로 한 단계씩 열림 · 그림은 전부 직접 그린 도해 · 정답까지 열면 그 주제 학생용 도구로 바로 이동", url:"https://hongyul67-cpu.github.io/drawing-master-hub/board.html", ord:2, cat:"제도 ⓪ 모아보기", type:"개념", rc:true, dist:"수업" },
+let TOOLS = window.HUB_TOOLS || [];   /* tools.enc 에서 복호화된 목록 (원본은 로컬 tools.js) */
 
-  { emoji:"📐", name:"도면 양식 · 척도", desc:"【Ⅱ 규격과 통칙】 A0을 직접 접어 A4까지 · 윤곽선/표제란/중심마크/구역표시/재단마크 · 척도(축척·현척·배척) 계산 + 종합시험", repo:"paper-scale-master", ord:1, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"🔍", name:"도면읽기 종합 (선 · 치수 · 기계요소)", desc:"【기초 종합】 🖥️ 수업 슬라이드 12장 + 통합 훈련장 — 부서 3곳(선의 종류·치수 읽기·기계요소 약도) 자격증을 모으면 🎯종합 자격시험 개방 · 견습생→마스터 5계급 ※치수는 아래 ‘치수기입 마스터’와 이어서 쓰면 좋습니다", repo:"domyeon-master", ord:2, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"📏", name:"치수기입", desc:"【Ⅱ-4 치수 기입】 치수 기입 요소 · 보조기호(φ R □ t C) · 기입 원칙 — 배우기 + 문제 + 종합점검 ※‘도면읽기 마스터’의 치수 부서를 규칙 쪽으로 더 파고드는 도구", repo:"dimensioning-master", ord:3, cat:"제도 ① 기초 — 양식 · 선 · 치수", type:"개념", rc:true, cm:true, dist:"공개" },
-
-  { emoji:"✏️", name:"기본 도법 작도", desc:"【Ⅲ-1 평면 도형】 자와 컴퍼스 작도 8종(수직이등분·수선·n등분·각 2등분·직각 3등분·정육각형·외접원·타원) — 단계 되감기 + 컴퍼스 자리 직접 클릭 + 종합시험", repo:"basic-construction-master", ord:1, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"게임", rc:true, cm:true, dist:"공개" },
-  { emoji:"📐", name:"투상 ① 투상도 — 개념", desc:"【Ⅲ-2 정투상】 🖥️ 수업 슬라이드 12장(발문·즉석퀴즈) + 정투상·제3각법 배우기 + 투상법 종류 / 3면도 배치 / 입체→투상도 3모드 + 종합점검 · ◀ 여기부터 시작", repo:"tusang-master", ord:2, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"📐", name:"투상 ② 3면도 — 실습", desc:"【Ⅲ-2 정투상】 3면도→입체 역추론 / 입체→투상도 / 각법 구분(제3각법·제1각법) + 종합시험 · 개념을 배운 뒤 손으로 익히는 단계", repo:"three-view-trainer", ord:3, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"🧩", name:"투상 ③ 정투상도 매칭 — 게임", desc:"【Ⅲ-2 정투상】 정투상 5뷰 맞추기 게임 · 난이도 5단계(하~마스터) · 실습까지 끝낸 뒤 속도·정확도를 겨루는 단계", repo:"block-view-matching", ord:4, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"게임", rc:true, cm:true, dist:"공개" },
-  /* ⚠ index.html 이 meta refresh 로 넘기면서 ?rc= 를 버려서, 실제 페이지로 직접 연결 (제출이 선생님 시트로 가도록) */
-  { emoji:"🧊", name:"단면 ① 단면도 — 3D 체험", desc:"【Ⅲ-3 단면도】 기계 부품을 3D로 직접 잘라 보며 원리 체험 + 도전 3종(매칭·탐정·단면종류) · 왜 자르는지를 먼저 보여 주는 단계", repo:"section-view-explorer", ord:5, url:"https://hongyul67-cpu.github.io/section-view-explorer/%EB%8B%A8%EB%A9%B4%EB%8F%84.html", cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"🪚", name:"단면 ② 단면도 규칙", desc:"【Ⅲ-3 단면도】 🖥️ 수업 슬라이드 13장 + 해칭 45°·절단선/화살표·길이방향으로 단면하지 않는 부품(축·키·리브·기어이) 3모드 + 종합점검 · 도면 규칙을 익히는 단계", repo:"danmyeon-master", ord:6, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"🎭", name:"특수 투상도 (등각 · 사투상 · 투시)", desc:"【Ⅲ-4 특수 투상】 같은 물체를 등각·사투상(카발리에/캐비닛)·투시(1·2·3점)로 동시 비교 + 소실점 시각화 + 종합시험", repo:"teuksu-tusang-master", ord:7, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"📦", name:"전개도", desc:"【Ⅲ-5 전개도】 전개도를 슬라이더로 직접 펼치고 접기(입체 8종) — 평행선법·방사선법·삼각형법 + 종합시험", repo:"jeongaedo-master", ord:8, cat:"제도 ② 도법 — 작도 · 투상 · 단면 · 전개", type:"개념", rc:true, cm:true, dist:"공개" },
-
-  { emoji:"⟂", name:"기계제도 기호", desc:"【기계제도 Ⅰ】 표면 거칠기 · 치수공차와 끼워맞춤 · 기하공차 — 배우기 + 문제 + 종합점검", repo:"mechanical-drawing-symbols", ord:1, cat:"제도 ③ 기호 · 재료 · 용접", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"🔩", name:"재료기호", desc:"【기계제도 Ⅰ-9】 SM45C·SS400·GC250 해독 — 기호 해독기(조각별 뜻) + 조각 끼워 기호 조립 + 부품란 읽기 + 종합시험", repo:"material-symbol-master", ord:2, cat:"제도 ③ 기호 · 재료 · 용접", type:"게임", rc:true, cm:true, dist:"공개" },
-  { emoji:"🔥", name:"용접기호", desc:"【기계제도 Ⅴ-1】 실선=화살표 쪽 / 파선=반대쪽 규칙을 실제 이음 단면과 연동 · 기본기호 9종 · 보조기호 · 치수(z a n×l(e) d) + 종합시험", repo:"weld-symbol-master", ord:3, cat:"제도 ③ 기호 · 재료 · 용접", type:"개념", rc:true, cm:true, dist:"공개" },
-
-  /* ── 전공 · 자동화설비기능사 ── */
-  { emoji:"📐", name:"실기 도면 해독 — 게임", desc:"공개도면 문제게임 3모드(해독·3D매칭·치수찾기) + 편집기", repo:"automation-practical-exam", cat:"자동화설비기능사", type:"게임", rc:true, cm:true, dist:"공개" },
-  { emoji:"🖥️", name:"실기 도면 해독 — 전자칠판 수업자료", desc:"이론 슬라이드 7단원 — 주서·표제란 / ∅·R / 모따기·필렛 / 단면·VIEW / 기준면 치수 / 공차·기하공차 / 실기 진행 순서 · 실제 공개도면 그림으로 설명 → 발문 → 퀴즈 → 정답 순서로 한 단계씩 열림", url:"https://hongyul67-cpu.github.io/automation-practical-exam/board.html", cat:"자동화설비기능사", type:"개념", dist:"수업" },
-  { emoji:"⚡", name:"시퀀스 · PLC 기초", desc:"‘자동화 공장 가동’ — 8스테이지 60단계로 공장을 살리는 게임: 전기기호 → 회로 실습(AND·OR) → 자기유지·정역 인터록 → PLC 래더(명령어·타이머) → 주회로(3상·MC·과부하계전기) → PLC 구조·스캔 → XG5000 디바이스·래더 작성 → 🏆실기 응용회로 도전 · 콤보 점수·이어하기", repo:"sequence-plc-master", cat:"자동화설비기능사", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🖥️", name:"시퀀스 · PLC 기초 — 전자칠판 수업자료", desc:"이론 슬라이드 8장 — 학생용 게임의 8단계와 순서를 그대로 맞춤 : 전기 기호와 a/b접점 · AND는 직렬 OR는 병렬 · 자기유지와 인터록 · 래더 읽는 법 · 주회로 vs 제어회로(정역=두 선 교체) · PLC 스캔 3단계 · XG5000 디바이스 P M T C D · 순차제어와 Y-Δ 기동 · 앞에서 한 단계 설명하고 바로 그 단계를 게임으로 풀릴 수 있음", url:"https://hongyul67-cpu.github.io/sequence-plc-master/board.html", cat:"자동화설비기능사", type:"개념", rc:true, dist:"수업" },
-  { emoji:"📝", name:"필기 CBT (기출 18회차)", desc:"18회차 1080문항(2017~2025) · 모의고사 · 과목별 학습 · 오답노트 + 이론 배우기 6단원(기계제도·기계가공·기계요소·작업안전·전기제어·PLC자동화) · 🎓선생님용 수업 모드 + 📺전자칠판(큰 화면·터치 판서)", repo:"automation-equipment-exam", cat:"자동화설비기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"🖥️", name:"자동화설비 필기 — 전자칠판 수업자료", desc:"이론 슬라이드 8장 · 필기 6과목을 그대로 단원으로 — ① 기계제도(선·보조기호·기하공차와 데이텀) ② 기계가공·측정(절삭속도 V=πDN/1000·측정기 최소눈금·한계게이지) ③ 기계요소·조립(리드 L=n×p / 베어링 수명 (C/P)³ / 모듈 D=mZ·속도비) ④ 작업안전(장갑 금지 작업·안전보건표지 색과 모양·LOTO) ⑤ 전기·제어(공압 계통·FRL·밸브 3갈래·5/2 밸브) ⑥ PLC·자동화(스캔 3단계·유도형 vs 정전용량형·광전센서) · 기출 계산식을 슬라이드에 그대로 담음", url:"https://hongyul67-cpu.github.io/automation-equipment-exam/board.html", cat:"자동화설비기능사", type:"개념", rc:true, dist:"수업" },
-  { emoji:"⚙️", name:"실기 PLC 제어작업", desc:"PLC 제어작업 실기 대비 · 단계별 학습 + 시운전 시뮬레이터 + 테스트 채점 · 🖥️수업 도구(교사용) 별도 제공", repo:"automation-plc-exam", cat:"자동화설비기능사", type:"문제풀이", rc:true, dist:"공개" },
-  { emoji:"🖥️", name:"실기 PLC — 전자칠판 수업자료", desc:"이론 슬라이드 17장 · 7단원(시퀀스 제어 기초 · PLC 기초 · 입출력과 센서 · 공압 기초 · 타이머와 카운터 · 스텝 제어 · 시험 조건 읽기) — 그림은 전부 SVG라 빔프로젝터에서 확대해도 선이 안 뭉갠다 · 화면 판서(펜·형광펜·지우개) · 가리개 · 타이머 · 번호 뽑기 · 전체화면", url:"https://hongyul67-cpu.github.io/automation-plc-exam/board.html", cat:"자동화설비기능사", type:"개념", dist:"수업" },
-  { emoji:"👩‍🏫", name:"실기 PLC — 교사용 수업 도구", desc:"시연(공정순서도 자동재생) · 모둠대결 · 번호 뽑기 · 조건 가리기 · 인쇄 학습지 · 전체화면 — 실습실 앞에서 바로 쓰는 진행 도구", url:"https://hongyul67-cpu.github.io/automation-plc-exam/teach.html", cat:"자동화설비기능사", type:"개념", dist:"수업" },
-
-  /* ── 전공 · 반도체설비보전기능사 (구 반도체장비유지보수기능사) ── */
-  { emoji:"🔬", name:"반도체설비보전 — 필기", desc:"필기 개념 — 배우기 16단원 69쪽(사진·식각·확산·증착·세정CMP·조립 등 공정 전체 + 진공/가스 · 보전이론 · 공유압 · 안전 · 기계 · 전기, 교재 도해 21장) + 게임 3종 + 빠른점검 20문항 + 실전 모의고사 60문항·60분 + 기출 170문항 · 교재 608문항(암호 잠금) · 🏆계급(아이언~마스터) · 🎓수업 슬라이드 9장 + 전자칠판 도구", repo:"semicon-maintenance-master", cat:"반도체설비보전기능사", type:"개념", rc:true, cm:true, dist:"공개" },
-  { emoji:"🖥️", name:"반도체설비보전 — 전자칠판 수업자료", desc:"이론 슬라이드 9장 — 앞에서 설명하며 요점 → 발문 → 퀴즈 → 정답 순서로 한 단계씩 여는 수업 화면", url:"https://hongyul67-cpu.github.io/semicon-maintenance-master/board.html", cat:"반도체설비보전기능사", type:"개념", dist:"수업" },
-  { emoji:"🔧", name:"반도체설비보전 — 실기", desc:"실기 대비 — Q-Net 공개문제 그대로. 조립 도면 12장(치수표) + 제어 과제 12세트(배치도·공기압회로도·변위단계선도·부가조건) + 배우기 12쪽 + 동작 시뮬레이터 + 게임 4종(도면 치수·순서 맞추기·실격 O·X·점검 20문항) · 🏆계급(아이언~마스터)", repo:"semicon-practical-master", cat:"반도체설비보전기능사", type:"문제풀이", rc:true, cm:true, dist:"공개" },
-  { emoji:"🖥️", name:"반도체설비보전 실기 — 전자칠판 수업자료", desc:"이론 슬라이드 7장 · Q-Net 공개문제 기준 — ① 조립작업(두 과제 구조·도면 읽기 R15/90°/(A)는 엘보·페럴 체결과 질소 0.5MPa 기밀시험) ② 제어작업(0.4MPa±0.05·실린더 부착형 속도제어밸브 금지·센서→단자대→PLC·스위치 3개와 동작상태 5가지·프로그램 요구사항) ③ 실격 피하기(치수 10mm·각도 20° 기준) · 슬라이드의 숫자는 전부 공개문제에 적힌 값", url:"https://hongyul67-cpu.github.io/semicon-practical-master/board.html", cat:"반도체설비보전기능사", type:"개념", rc:true, dist:"수업" },
-
-  /* ── 전공 · 공조냉동 · 에너지제어 ── */
-  { emoji:"📽️", name:"공기조화설비 — 수업 슬라이드", desc:"6단원 + 시퀀스 회로도·표준 냉동 계통도를 그림·표로 설명하는 교실용 슬라이드 35장 — 단원 이동·전체화면", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/slides.html", cat:"공조냉동 · 에너지제어", type:"개념", dist:"수업" },
-  { emoji:"🌬️", name:"공기조화설비 — 개념게임", desc:"교과서 6단원 + 시퀀스회로·냉동·안전 — 배우기 카드 + 짝맞추기·분류·순서맞추기 4모드", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/game.html", cat:"공조냉동 · 에너지제어", type:"게임", dist:"공개" },
-  { emoji:"📝", name:"공기조화설비 — 점검 CBT", desc:"단원·문항 수 선택 · 회로도 문항 · 자동 채점 · 오답노트 · 결과 제출 (문제 69)", repo:"hvac-master", url:"https://hongyul67-cpu.github.io/hvac-master/check.html", cat:"공조냉동 · 에너지제어", type:"문제풀이", rc:true, dist:"수업" },
-
-  /* ── 전공 · 드론 제작 (항공드론과) ── */
-  { emoji:"🚁", name:"드론 제작 · 픽스호크 — 게임", desc:"부품도감→프레임·모터 조립→픽스호크 결선→프로펠러→조종기 세팅→미션플래너 보정→가상 시험비행", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-pixhawk.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
-  { emoji:"🛩️", name:"드론 제작 · 아두이노 나노 — 게임", desc:"FC기판 핀 결선표 · 3D출력 설정 · 모터/ESC 조립 · MultiWii 세팅 · ESC보정·안전점검", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-sim-arduino.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, dist:"공개" },
-  { emoji:"📦", name:"드론 임무장치 제작", desc:"에어 드롭 장치·2축 짐벌 — 인벤터 모델링 순서·출력 설정·서보 제어로 실제 투하", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/build-mission-device.html", cat:"드론 제작 (항공드론과)", type:"게임", rc:true, cm:true, dist:"공개" },
-  { emoji:"📝", name:"드론 제작 실습 보고서", desc:"만들기 게임 기록 자동 유입 · 자기평가 · 서술형 4문항 · 사진첨부 · A4 인쇄/PDF", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/report.html", cat:"드론 제작 (항공드론과)", type:"문제풀이", rc:true, dist:"수업" },
-  { emoji:"🖥️", name:"드론 이론 — 전자칠판 수업자료", desc:"이론 1~6차시를 수업용 큰 화면으로 — 드론 개요 / 비행 원리 / 기본구조 / 법규와 조종자 준수사항 / 배터리·센서·안전성인증검사 / 기체 신고번호와 공역 · 슬라이드마다 타이머 · 전체화면 · 학생 화면 전환 · 이 링크로 열면 수업 모드가 처음부터 켜져 있음", url:"https://hongyul67-cpu.github.io/drone-master/?class=1", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"수업" },
-  /* 허브 자체는 채점하지 않지만 ?rc= 를 하위 도구 링크에 그대로 물려 주므로 rc 필요 (제도 허브와 동일) */
-  { emoji:"🔧", name:"드론 전체 모아보기", desc:"만들기 게임 3종 + 이론 6차시 + 실습 보고서 전체 모음", repo:"drone-master", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, dist:"공개" },
-  /* 이론 1~6차시는 개별로 나열하지 않고 한 줄로 묶는다(허브 안에서 차시별로 바로 열림) */
-  { emoji:"📖", name:"드론 이론 1~6차시 (묶음)", desc:"개요·비행원리·기본구조·법규·배터리/센서·신고번호/공역 — 배우기+게임+학습지+탐구보고서. 각 차시에서 🎓수업용을 누르면 교실 앞 화면용 큰 글씨 슬라이드(정답 가림·타이머)로 전환", repo:"drone-master", url:"https://hongyul67-cpu.github.io/drone-master/", cat:"드론 제작 (항공드론과)", type:"개념", rc:true, cm:true, dist:"공개" },
-
-  /* ── 전공 · 3D프린터운용기능사 ── */
-  { emoji:"🖨️", name:"3D프린터운용기능사 필기", desc:"개념 + 자작 문제은행 378문항(4개 은행 · 계산형 자동생성 포함) · 주제별 학습 · 오답노트 학습게임", repo:"3dprinter-master", cat:"3D프린터운용기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"🖥️", name:"3D프린터운용기능사 — 전자칠판 수업자료", desc:"이론 슬라이드 11장 · 4단원 — ① 3D프린팅 이해(적층가공·FDM/SLA/DLP/SLS·PLA vs ABS) ② 데이터 만들기(3D 스캐닝·STL/OBJ/STEP·넙스 vs 폴리곤) ③ 출력 준비와 실행(레이어·인필·서포트·G0/G1/G28/M104/M109) ④ 마무리와 안전(워핑·스트링·메시 오류·후처리 순서·심폐소생술) · 요점 → 발문 → 퀴즈 → 정답 순서로 한 단계씩 열림 · 그림은 전부 직접 그린 도해 · 슬라이드 끝에서 그 항목 문제풀이로 바로 이동", url:"https://hongyul67-cpu.github.io/3dprinter-master/board.html", cat:"3D프린터운용기능사", type:"개념", rc:true, dist:"수업" },
-
-  /* ── 전공 · 전기기능사 ── */
-  { emoji:"⚡", name:"전기기능사 필기 CBT", desc:"🏆 계급전(아이언→마스터 7단계×3등급) — 정답·연속정답·합격 보너스로 XP 획득, 승급 연출·랭킹/전적(최고기록 TOP10·과목별 정답률·연속 학습일) · 📅 16차시 수업 진행안(차시별 학습목표·45분 진행순서·쓸 그림/이론/계산·과제, 버튼으로 즉시 이동) · 🖼️ 그림으로 개념 잡기 55장(출제기준 20개 항목 전부·기출 대조 검증) · 🧮 계산 문제 풀이 24유형(교재에 없는 수식 해설을 단계별로·실수/검산 팁) · 🏫 수업 모드(프로젝터용 큰 글씨·타이머·정답 공개·학생 번호 뽑기·단축키) · 🤝 함께 풀기(힌트=관련 이론·오답 2개 지우기·차등 점수) · 핵심이론 요약 25쪽(확대뷰어) · 반복기출 500제 · 기출 24회차 1,440문항 CBT · 유형별 랜덤 · 출제기준 항목별 · 약점 집중 · 오답노트", repo:"electrician-written-exam", cat:"전기기능사", type:"문제풀이", rc:true, dist:"수업", cr:true },
-
-  /* ── 전공 · 철도교통안전관리자 ── */
-  { emoji:"🚄", name:"철도교통안전관리자 전 과목", desc:"철도교통안전관리자(철교안) 국가자격 대비 — 1교시 교통법규(교통안전법·철도안전법·철도산업발전기본법, 배우기 31강+50문항 CBT+시험직전 숫자·주체 총정리) · 교통안전관리론(사고이론+운전자·차량·운행 관리) · 철도공학(궤도틀림·유지보수, 캔트·슬랙 계산 연습기) · 선택과목 3종(철도신호·전기이론·열차운전) · 전 과목 125문항 실전 모의고사(과락 판정) · 수업용 자료(16차시 운영안·인쇄 학습지 3종·발문/오개념). 법령 원문 기준 총 267문항, 수업모드 지원", repo:"cheolgyoan-master", cat:"철도교통안전관리자", type:"개념", rc:true, dist:"공개" },
-  { emoji:"👩‍🏫", name:"철도교통안전관리자 — 수업용 자료", desc:"16차시 운영안(차시·주제·쓸 도구·수업 흐름·과제) · 수업 진행 발문과 오개념 · 인쇄 학습지 3종 · 시수가 부족할 때 고를 핵심 차시 표시", url:"https://hongyul67-cpu.github.io/cheolgyoan-master/teach.html", cat:"철도교통안전관리자", type:"개념", dist:"수업" },
-
-  /* ── 전공 · 열처리기능사 ── */
-  { emoji:"🔥", name:"열처리", desc:"금속열처리작업 — 배우기 8카드 + 영상 강의 4편(유튜브 연결·메모) + 열처리로 시뮬레이터(조직·HRC·선도) + 게임 5종(냉각경도·조직·강종짝맞추기·불꽃시험·실기공개문제) + 15문항 점검·결과카드 (SM45C·SCM440 공개문제 기반)", repo:"heat-treatment-master", cat:"열처리기능사", type:"개념", rc:true, dist:"공개" },
-  { emoji:"🖥️", name:"열처리 — 전자칠판 수업자료", desc:"이론 슬라이드 6장 · 3단원 — ① 담금질·뜨임·불림·풀림 / 변태점(A1 723℃·A3) ② 마르텐사이트–트루스타이트–소르바이트–펄라이트 / SM45C 수냉 vs SCM440 유냉(퀜칭 크랙) / 표면경화 3종(침탄·질화·고주파) ③ 경도시험 HRC·HB·HV / 불꽃·조직시험 / 기름 화재 안전 · 실기 공개문제 기준", url:"https://hongyul67-cpu.github.io/heat-treatment-master/board.html", cat:"열처리기능사", type:"개념", rc:true, dist:"수업" },
-
-  /* ── 전공 · 금속재료시험기능사 ── */
-  { emoji:"🔩", name:"금속재료시험", desc:"금속재료시험작업 — 배우기 7주제(불꽃·경도·충격·조직 + 필답) + 게임 4종(불꽃·조직 캔버스 판별·경도/충격 계산·개념매칭) + 필답 CBT 20문항 (공개 실기문제·필답 기출 기반)", repo:"metal-materials-master", cat:"금속재료시험기능사", type:"개념", rc:true, dist:"수업", cr:true },
-  { emoji:"🖥️", name:"금속재료시험 — 전자칠판 수업자료", desc:"이론 슬라이드 7장 · 3단원 — ① 불꽃시험(유선·파열·색) / 철강의 갈래(탄소 2% 경계, SS400 vs SM45C) ② 경도시험 5종(HB·HRB·HRC·HV·HS 압입자와 측정법) / 충격시험(샤르피·아이조드·저온취성) / 인장시험(항복점·인장강도·연신율) ③ 조직시험 6단계(연마→폴리싱→나이탈 부식) / 비파괴검사 PT·MT·UT·RT와 안전", url:"https://hongyul67-cpu.github.io/metal-materials-master/board.html", cat:"금속재료시험기능사", type:"개념", rc:true, dist:"수업" },
-
-  /* ── 전공 · 컴퓨터활용능력 1급 ── */
-  { emoji:"🎓", name:"컴활 1급 필기 개념게임", desc:"컴퓨터일반·엑셀·액세스 3과목 22단원 · 카드/스피드퀴즈/OX/매칭 4모드", repo:"comhwal", cat:"컴퓨터활용능력 1급", type:"게임", rc:true, dist:"수업" },
-  { emoji:"🖥️", name:"컴퓨터활용능력 — 전자칠판 수업자료", desc:"이론 슬라이드 9장 · 3단원 — ① 컴퓨터 일반(기억장치 계층·RAM/ROM·네트워크와 IPv4/IPv6·프로토콜·보안 3요소와 악성코드) ② 스프레드시트(셀 참조와 $·핵심 함수 10개·정렬/필터/부분합/피벗·매크로) ③ 데이터베이스(기본키·외래키·테이블/쿼리/폼/보고서) · <b>①② 는 1급·2급 공통, ③ 은 1급</b> — 2급 수업이면 ①②만 돌리면 됨", url:"https://hongyul67-cpu.github.io/comhwal/board.html", cat:"컴퓨터활용능력 1급", type:"개념", rc:true, dist:"수업" },
-  { emoji:"📝", name:"컴활 1급 필기 CBT", desc:"모의고사 4종(실전 60문항60분·하프 30문항·컴퓨터일반만·스프레드시트만 각 20문항) · 타이머·문제팔레트·과락판정·오답노트", repo:"comhwal-cbt", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"📊", name:"컴활 1급 실기 함수 연습소", desc:"실전 46문제 — 실제 엑셀 함수를 직접 입력하면 수식엔진(52함수 지원)이 계산해 채점 (IF·VLOOKUP·INDEX/MATCH·SUMIF·배열수식 등)", repo:"comhwal-excel", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업" },
-  { emoji:"🗄️", name:"컴활 1급 실기 SQL 연습소", desc:"실전 49문제 — 실제 SELECT문을 작성하면 SQL엔진이 실행해 결과로 채점 (WHERE·GROUP BY·ORDER BY·COUNT/SUM 집계 등)", repo:"comhwal-access", cat:"컴퓨터활용능력 1급", type:"문제풀이", rc:true, dist:"수업" },
-
-  /* ── 전공 · 컴퓨터활용능력 2급 ── */
-  { emoji:"🎓", name:"컴활 2급 필기 개념게임", desc:"컴퓨터일반·스프레드시트 2과목 16단원 · 카드/스피드퀴즈/OX/매칭 4모드 + 모의고사 3종(실전 40문항40분·미니 20문항·전체 총정리) + 시험 직전 핵심 요약", repo:"comhwal2", cat:"컴퓨터활용능력 2급", type:"게임", rc:true, dist:"수업" },
-  { emoji:"🖥️", name:"컴퓨터활용능력 2급 — 전자칠판 수업자료", desc:"1급 자료와 같은 화면 — ① 컴퓨터 일반 ② 스프레드시트 두 단원만 돌리면 2급 범위입니다(③ 데이터베이스는 1급 전용)", url:"https://hongyul67-cpu.github.io/comhwal/board.html", cat:"컴퓨터활용능력 2급", type:"개념", dist:"수업" },
-  { emoji:"📝", name:"컴활 2급 필기 CBT", desc:"실제 기출 320문항(5회차 + 자주출제 120선) · 40문항 40분 · 과락판정·오답노트", repo:"comhwal2-cbt", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"📊", name:"컴활 2급 실기 함수 연습소", desc:"실전 67문제 — 실제 엑셀 함수를 직접 입력하면 수식엔진(76함수 지원)이 계산해 채점 (IF·VLOOKUP·DSUM·RANK·COUNTIF 등)", repo:"comhwal2-excel", cat:"컴퓨터활용능력 2급", type:"문제풀이", rc:true, dist:"수업" },
-
-  /* ── 진로 · 직업생활 ── */
-  { emoji:"💼", name:"성공적인 직업생활", desc:"교과 6단원 18주제 — 배우기(기본+🔎더 알아보기) + 테스트(4지선다 92문항) + 과제 제출", repo:"job-life-master", cat:"진로 · 직업생활", type:"개념", rc:true, dist:"수업" },
-  { emoji:"📽️", name:"성공적인 직업생활 · 전자칠판 수업자료", desc:"수업용 슬라이드 27장 · 6단원 — 직접 그린 그림 23종 + 빈칸 같이 풀기 + 화면 판서 · 글씨 크기 조절 · 프레젠터 리모컨 · 교과 주제(직업의 3요소·생애 발달·기업 형태·직업기초능력 10가지·합리적 의사결정 5단계·근로 3권·안전표지·4대 보험·직업윤리 5의식) 전 범위", url:"https://hongyul67-cpu.github.io/job-life-master/class.html", cat:"진로 · 직업생활", type:"개념", dist:"수업" },
-
-  /* ── 취업 · NCS 직업기초능력 ── */
-  { emoji:"🎓", name:"NCS 직업기초능력", desc:"공기업 고졸채용 필기 대비 — 10개 영역 전체(의사소통·수리·문제해결·자기개발·자원관리·대인관계·정보·기술·조직이해·직업윤리) · 배우기→게임→실전 점검→전체 풀이 · 실전 모의고사 10회 + 추천 세트(분야 묶음)·분야 직접 선택 · 기초/심화", repo:"ncs-master", cat:"취업 · NCS 직업기초능력", type:"게임", rc:true, dist:"수업", cr:true },
-  { emoji:"🖥️", name:"NCS 직업기초능력 — 전자칠판 수업자료", desc:"이론 슬라이드 10장 · 4단원 — ① 소통과 관계(공문서 작성·경청 방해요인·갈등관리 5유형) ② 수리와 문제해결(증감률·평균/중앙값/최빈값·문제 3유형·5Why·SWOT) ③ 자원·정보·기술(시간관리 4사분면·직접비/간접비·자료→지혜·5W2H·노하우vs노와이·산업재해 원인) ④ 나와 조직(조하리의 창·조직구조·본원적 경쟁전략·결재·근로윤리/공동체윤리) · 슬라이드 끝에서 그 영역 학습으로 바로 이동", url:"https://hongyul67-cpu.github.io/ncs-master/board.html", cat:"취업 · NCS 직업기초능력", type:"개념", rc:true, dist:"수업" },
-  { emoji:"📝", name:"NCS 문제풀이", desc:"2,265문항 랜덤 출제 → 자체 채점 → 오답 해설 복습 · 출제방식 4종(랜덤/틀린 문항/⭐별표/안 푼 문항)으로 내 오답만 골라 풀기 · 자작 539문항은 바로 풀 수 있고, 실전 1,726문항은 주간 8자리 코드 필요(교사용 암호로 열면 그 주 코드가 화면에 표시, 5년치 내장)", repo:"ncs-practice", cat:"취업 · NCS 직업기초능력", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"🤖", name:"단계별 AI 수업 (전체 모음)", desc:"인공지능(AI)과 직업생활 교과 실습 — 17개 모듈을 스텝별로 따라가는 학생용 화면. 1단계 AI 쓰기 전 약속 3가지 → 2단계 프롬프트 기본기 → 3단계 실전 13종(회의록·메일·건의문·체험학습 보고서·근로계약서·수업자료·보고서·발표자료·발표대본·예상질문·간단한 앱·설문·비교선택) → 4단계 내 주제로 해보기·포트폴리오 · 스텝마다 보낼 프롬프트 · 이런 답이 오면 정상(실제 예시) · 막혔을 때 문장 · 결과 기록칸(틀 제공) · AI 사용 기록표 · 학생용 워크북과 교사용 운영가이드 워드 파일 포함", url:"https://hongyul67-cpu.github.io/ai-step-master/", cat:"AI 활용 (인공지능과 직업생활)", type:"개념", dist:"수업" },
-  { emoji:"🤝", name:"AI 쓰기 전 약속 3가지 (첫 시간)", desc:"10~15분 4스텝 — ① 넣지 말 것(개인정보) ② 믿지 말 것(할루시네이션 직접 체험) ③ 숨기지 말 것(AI 사용 기록표 여섯 줄) · AI를 쓰지 않았을 때 어떻게 적는지까지 포함 · 마지막에 「우리 반 AI 약속 카드」를 만들어 교실에 붙인다", url:"https://hongyul67-cpu.github.io/ai-step-master/0_AI%EC%93%B0%EA%B8%B0%EC%A0%84%EC%95%BD%EC%86%8D3%EA%B0%80%EC%A7%80.html", cat:"AI 활용 (인공지능과 직업생활)", type:"개념", dist:"수업" },
-  { emoji:"🖥️", name:"단계별 AI 수업 — 전체 모듈 한 파일", desc:"17개 모듈을 한 파일에 담은 것 — 인터넷이 느린 교실이나 오프라인에서 쓰기 좋다", url:"https://hongyul67-cpu.github.io/ai-step-master/%EB%8B%A8%EA%B3%84%EB%B3%84AI%EC%88%98%EC%97%85_%EC%A0%84%EC%B2%B4%EB%AA%A8%EC%9D%8C.html", cat:"AI 활용 (인공지능과 직업생활)", type:"개념", dist:"수업" },
-
-  /* ── 인문 · 기초학습 ── */
-  { emoji:"📊", name:"기초학력 진단", desc:"중1~고3 수준 국어·영어·수학 학습·진단 — 학년·과목 선택(복수) · 과목당 20문항 매번 랜덤 출제(3과목 60문항) · 자동 채점 + 결과 이미지 출력", repo:"gicho-hakryeok-master", cat:"인문 · 기초학습", type:"문제풀이", rc:true, dist:"수업", cr:true },
-  { emoji:"🖥️", name:"기초학력 — 전자칠판 수업자료", desc:"이론 슬라이드 9장 · 3단원 — 국어(문장의 뼈대·맞춤법 되돼/안않/왠웬/로서로써·중심 문장 찾기) / 영어(be동사와 일반동사·시제·전치사 in·on·at) / 수학(분수·소수·백분율·일차방정식·비례식과 단위환산) · 진단도구가 실제로 묻는 것 중 가장 많이 틀리는 것만 골랐고, 슬라이드 끝에서 진단 도구로 바로 이동", url:"https://hongyul67-cpu.github.io/gicho-hakryeok-master/board.html", cat:"인문 · 기초학습", type:"개념", rc:true, dist:"수업" },
-  { emoji:"🏫", name:"사회생활 준비 (금융 · 노동 · 소비)", desc:"사회생활 준비 학습 도구 27개 모음(11단원) — 근로계약·최저임금/주휴수당·월급명세서, 복리·통장쪼개기·신용점수, 보이스피싱·등기부등본, 비즈니스 이메일·직장매너, 자소서 STAR·모의면접, 군 봉급·전역머니, 퇴직금·실업급여, 작업중지권·현장안전, 다크패턴·환불판정, 전세위험도·자취예산, 인플레이션·중앙은행·환율", repo:"social-life-tools", cat:"인문 · 기초학습", dist:"공개" },
-
-  /* ── 글로벌 현장학습 (호주) ── */
-  { emoji:"🇦🇺", name:"호주 현장학습 기록장", desc:"호주 글로벌 현장학습(용접·산업 견학) 하루 기록 — 장소·방문유형·인상 깊었던 점·한국과 다른 점·질문 + 사진 2~5장 · 학생 활동 보고서 PDF 저장 · 선생님께 제출 · 📷사진만 제출(사진→PDF 한 개)", repo:"global-memo", cat:"글로벌 현장학습 (호주)", dist:"수업" },
-
-  /* ── 교사 도우미 (수업 · 행정) ── */
-  { emoji:"✍️", name:"생기부 문장 생성기", desc:"행동특성 · 세부능력특기사항 + 창의적 체험활동(자율·동아리·진로)·모둠/탐구활동 문장 생성 · 글자수(자) 제한 맞춤 · 본인 Gemini API 키 입력 방식", repo:"saenggibu-generator", cat:"교사 도우미 (수업 · 행정)", dist:"개인" },
-  { emoji:"🤖", name:"실습과제 도구 모음", desc:"과제 양식 만들기 · 과제 목록 · 채점(교사용) · 제출 도구", repo:"ai-task-tools", cat:"교사 도우미 (수업 · 행정)", dist:"수업" },
-  { emoji:"📣", name:"신입생 모집 홍보 관리", desc:"홍보 대상 중학교 우선순위 · 방문(1~6차) 기록·팀 공유 (학교 단위 데이터, 개인정보 없음)", repo:"middle-school-hongbo", cat:"교사 도우미 (수업 · 행정)", dist:"개인" },
-  { emoji:"🧾", name:"출장여비 서류 자동화", desc:"관외출장 여비정산 신청서 · 자동차운임 산출내역서 · 증빙용지 3종을 입력 한 번으로 · 거리×유가÷연비 자동계산 · 경유지/왕복 · 길찾기 캡처·영수증 첨부 · A4 인쇄", repo:"chuljang-yeobi", cat:"교사 도우미 (수업 · 행정)", dist:"개인" },
-  { emoji:"📥", name:"결과수집 링크 생성기", desc:"학습도구 결과를 내 구글시트로 모으기 · 교사별 공유 링크 자동 생성", url:"https://hongyul67-cpu.github.io/links/link-builder.html", cat:"교사 도우미 (수업 · 행정)", dist:"개인" },
-  { emoji:"📖", name:"결과수집 설정 가이드", desc:"내 구글시트 연결 방법 (교사용, 컴퓨터로 5분)", url:"https://hongyul67-cpu.github.io/links/guide.html", cat:"교사 도우미 (수업 · 행정)", dist:"공개" },
-
-  /* ── 학급 관리 ── */
-  { emoji:"💬", name:"상담 일지 도구", desc:"상담 내용 기록 · 관리", repo:"counseling", cat:"학급 관리", dist:"개인" },
-  { emoji:"📅", name:"방학 시간표 관리", desc:"방학 계획 · 시간표 관리 웹앱", repo:"vacation-schedule", cat:"학급 관리", dist:"개인" },
-  { emoji:"🎱", name:"구슬 낙하 뽑기", desc:"공이 못·서로 부딪히며 떨어져 발표 순서·당번 추첨", repo:"pinball-picker", cat:"학급 관리", dist:"공개" },
-
-  /* ── 내부·관리용 (학생·타 교사에게 공유하지 않는 도구) ──
-     CATEGORIES 마지막 영역. 여기서 골라 담지 않는 한 공유 파일엔 분류 자체가 안 들어갑니다. */
-  { emoji:"🗝️", name:"링크모음 마스터 (이 파일)", desc:"전체 도구 원본 · 공유용 파일/QR 만들기 (지금 이 화면)", url:"https://hongyul67-cpu.github.io/links-master/", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
-  { emoji:"🌐", name:"공개 허브 (links)", desc:"예전 공개 링크 허브 — 동결 유지, 건드리지 않음", url:"https://hongyul67-cpu.github.io/links/", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
-  { emoji:"📥", name:"결과수집 백엔드 (result-collector)", desc:"links/collector.js 로 통합된 폴백 저장소 · 더 이상 수정 안 함", url:"https://github.com/hongyul67-cpu/result-collector", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
-  { emoji:"📸", name:"화면 캡처 SnapShot", desc:"Windows 화면 캡처 프로그램 · 저장소에서 SnapShot.exe 내려받아 실행", url:"https://github.com/hongyul67-cpu/snapshot-capture", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
-  { emoji:"🖥️", name:"폰 ↔ PC 원격 (phone-pc-remote)", desc:"개인용 원격 조작 도구 · 비공개 저장소", url:"https://github.com/hongyul67-cpu/phone-pc-remote", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인" },
-  { emoji:"🔁", name:"시간표 · 결보강 시스템", desc:"특성화고 시간표 정규화 + 결강→보강 자동추천 (exe/html) · 교사 실명 포함 비공개, 공유 금지", url:"https://github.com/hongyul67-cpu/timetable-substitute", cat:"내부 · 관리용 (공유하지 마세요)", dist:"개인", pv:true },
-];
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 /* 도구가 실제로 열리는 주소 (url 이 있으면 그걸, 없으면 GitHub Pages repo 주소) */
@@ -989,6 +907,59 @@ document.getElementById("adminCopy").onclick = function(){
     setTimeout(()=>{ this.textContent="링크 복사"; }, 1500);
   });
 };
+</script>
+
+<script>
+verFill();   // 빌드 표식은 잠금과 무관하니 열자마자 채운다
+
+/* 잠금이 풀리기 전에는 위 본체가 돌지 않는다(type="text/plain").
+   암호가 맞으면 그때 진짜 script 로 바꿔 넣어 실행시킨다.
+
+   ⚠ lock.js 를 못 불러오면 HubLock 이 없어 여기서 예외가 난다.
+      그러면 이 블록의 나머지(버전 표시 등)까지 통째로 죽으므로,
+      잠금과 무관한 것을 먼저 실행하고 mount 는 감싸 둔다.
+      (잠금은 fail-closed — HubLock 이 없으면 목록은 잠긴 채로 남는다) */
+if (typeof HubLock === "undefined") {
+  console.error("lock.js 를 불러오지 못했습니다 — 목록은 잠긴 상태로 둡니다.");
+} else HubLock.mount(function(){
+  var el = document.createElement("script");
+  el.textContent = document.getElementById("hubsrc").textContent;
+  document.body.appendChild(el);
+  wkFill();                       // 아래쪽 주간 코드 카드 채우기
+  verFill();                      // 버전·점검 정보 채우기
+});
+
+/* 버전 표시 — 빌드 표식(lock.js?v=0db10a7d)과 실제 도구 수를 그대로 읽어 쓴다.
+   숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
+   함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
+function verFill(){
+  try{
+    var m = /lock\.js\?v=([A-Za-z0-9]+)/.exec(document.documentElement.innerHTML);
+    document.getElementById("vtag").textContent = "build " + (m ? m[1] : "—");
+    var n = document.querySelectorAll("#list .item.card").length;
+    document.getElementById("vcount").textContent = n ? n : "—";
+  }catch(e){}
+}
+
+
+/* 주간 학생 코드 카드 — 교사용으로 열었을 때만 보인다.
+   학생 코드로 들어온 사람에게 다음 주 코드까지 보여 주면 안 되기 때문이다. */
+function wkFill(){
+  var box = document.getElementById("wkbox");
+  HubLock.codes().then(function(c){
+    if(!c){ box.classList.add("off"); return; }      // 교사용이 아니면 감춘다
+    document.getElementById("wkcode").textContent = c.code;
+    document.getElementById("wkrange").textContent = c.from + " ~ " + c.to + " 까지";
+    document.getElementById("wkcopy").onclick = function(){
+      var b = this, old = b.textContent;
+      var done = function(){ b.textContent = "복사됨 ✓"; setTimeout(function(){ b.textContent = old; }, 1400); };
+      if(navigator.clipboard && navigator.clipboard.writeText)
+        navigator.clipboard.writeText(c.code.replace(/\s/g,"")).then(done, done);
+      else done();
+    };
+    document.getElementById("wkmore").onclick = function(){ HubLock.panel(); };
+  }).catch(function(){ box.classList.add("off"); });
+}
 </script>
 </body>
 </html>
