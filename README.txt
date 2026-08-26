@@ -56,8 +56,25 @@
     올라가는 것은 암호화본 tools.enc 뿐입니다.
 
   1) tools.js 에 카드 한 줄 추가
-  2) python build_lock.py --pw <교사용 암호>     ← tools.enc 다시 만들기
-  3) git add -A ; git commit -m "..." ; git push
+  2) 새 과목이면 master.html 의 AREAS 에도 등록   ← 아래 ★ 꼭 읽으세요
+  3) python build_lock.py --pw hong2281          ← tools.enc 다시 만들기
+  4) git add -A ; git commit -m "..." ; git push
+  5) master.html 을 열어 그 도구가 제 분야 아래 보이는지 눈으로 확인
+
+  ★ 새 과목(cat)을 쓸 때는 master.html 의 AREAS 에도 넣어야 합니다.
+    안 넣어도 오류가 안 납니다 — 대신 목록 맨 아래 "미분류" 자리에 조용히 떨어집니다.
+    실제로 신재생에너지발전설비기능사가 그 상태로 한동안 있었습니다(2026-08-27 수정).
+
+    master.html 안 이 줄들을 찾아서, 맞는 분야의 [ ] 안에 과목 이름을 더하세요.
+      const AREAS = [
+        ["⚡ 전기 · 신재생에너지", ["전기기능사", "신재생에너지발전설비기능사"], "전공"],
+                 ↑ 분야 이름            ↑ 여기에 과목 이름을 넣습니다
+    분야 자체가 새로 필요하면 줄을 하나 더 만들면 됩니다.
+    (세 번째 "전공" 은 배지입니다. 전공 과목이 아니면 빼세요.)
+
+  ※ tools.enc 를 다시 만들어도 학생 주간 코드는 안 바뀝니다.
+    코드는 _weekly/secret.json 에서 나오고 build_lock.py 가 그걸 새로 만들지 않습니다.
+    교사용 암호도 --pw 로 준 값 그대로입니다 (지금은 hong2281).
 
   한 줄 형식:
     { emoji:"🔧", name:"이름", desc:"설명",
