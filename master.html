@@ -208,6 +208,14 @@
       <span><b>받는 사람이 자기 구글시트를 연결할 수 있게</b><br>
         <span style="color:var(--dim);font-size:12px">켜면 파일 안에 "내 시트 연결" 버튼이 생겨서, 다른 선생님이 자기 exec 주소를 넣고 자기 시트로 결과를 받아요.</span></span>
     </label>
+
+    <label class="optrow">
+      <input id="fixOrder" type="checkbox">
+      <span><b>🎓 수업용 — 모두 같은 문제로</b><br>
+        <span style="color:var(--dim);font-size:12px">문제풀이 도구는 원래 문제와 보기를 학생마다 무작위로 뽑습니다.
+        켜면 <b>그날 연 학생 모두가 같은 문제·같은 보기</b>를 받아 "3번 문제 2번 보기" 가 통합니다.
+        다음 수업에는 자동으로 다른 문제가 나옵니다.</span></span>
+    </label>
   </div>
 
   <div class="panel">
@@ -291,7 +299,7 @@
   </div>
 </div>
 
-<script src="lock.js?v=57a63e50"></script>
+<script src="lock.js?v=216e35a7"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="text/plain" id="hubsrc">
@@ -580,7 +588,7 @@ document.getElementById("mcopy").onclick = function(){
 refresh();
 
 /* ── 공유용 HTML 생성 (고른 도구만 담긴 독립 파일) ── */
-function buildHTML(sel, title, rc, allowRc){
+function buildHTML(sel, title, rc, allowRc, fix){
   const data = sel.map(t => ({ emoji:t.emoji, name:t.name, desc:t.desc, repo:t.repo, url:t.url, cat:t.cat, type:t.type, ord:t.ord }));
   const css = `:root{--bg:#0f1420;--card:#1a2130;--card2:#222c40;--line:#2c3852;--tx:#eef2fb;--dim:#9aa7c2;--accent:#5b8cff;--game:#38d39f;--concept:#5b8cff;--quiz:#f0a742}
 @media (prefers-color-scheme: light){:root{--bg:#f3f5fb;--card:#fff;--card2:#f7f9ff;--line:#e3e8f4;--tx:#1a2233;--dim:#5c6a86;--accent:#3565e6;--game:#12a97a;--concept:#3565e6;--quiz:#d98518}}
@@ -638,6 +646,8 @@ footer{margin-top:34px;color:var(--dim);font-size:12px;text-align:center}
 const GH_USER=${JSON.stringify(GH_USER)};
 const BAKED_RC=${JSON.stringify(rc||"")};
 const ALLOW_RC=${allowRc?"true":"false"};
+/* 수업용 「모두 같은 문제」 — 도구 주소에 ?fix=1 을 붙인다 */
+const BAKED_FIX=${fix?"true":"false"};
 const CATEGORIES=${JSON.stringify(CATEGORIES)};
 const TYPE_ORDER=${JSON.stringify(TYPE_ORDER)};
 const TYPE_CLASS={"게임":"t-game","개념":"t-concept","문제풀이":"t-quiz"};
@@ -650,7 +660,9 @@ function myRc(){try{return localStorage.getItem(LSK)||"";}catch(e){return "";}}
 function curRc(){return (ALLOW_RC&&myRc())||BAKED_RC||"";}
 function validRc(u){return /^https:\\/\\/script\\.google\\.com\\/macros\\/s\\/.+\\/exec$/.test(u);}
 function linkOf(t){var u=t.url||("https://"+GH_USER+".github.io/"+t.repo+"/");var rc=curRc();
-  if(rc&&t.repo)u+=(u.indexOf("?")<0?"?":"&")+"rc="+encodeURIComponent(rc);return u;}
+  if(rc&&t.repo)u+=(u.indexOf("?")<0?"?":"&")+"rc="+encodeURIComponent(rc);
+  if(BAKED_FIX&&t.repo)u+=(u.indexOf("?")<0?"?":"&")+"fix=1";
+  return u;}
 
 var app=document.getElementById("app");
 function render(){
@@ -719,11 +731,12 @@ function currentHTML(){
   const title = (document.getElementById("title").value||"학습 도구 모음").trim();
   const rc = document.getElementById("rc").value.trim();
   const allowRc = document.getElementById("allowRc").checked;
-  return { html: buildHTML(picked(), title, rc, allowRc), title, rc, allowRc };
+  const fix = document.getElementById("fixOrder").checked;
+  return { html: buildHTML(picked(), title, rc, allowRc, fix), title, rc, allowRc, fix };
 }
 
 exportBtn.onclick = ()=>{
-  const { html, title, rc, allowRc } = currentHTML();
+  const { html, title, rc, allowRc, fix } = currentHTML();
   const blob = new Blob([html], {type:"text/html;charset=utf-8"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -734,7 +747,8 @@ exportBtn.onclick = ()=>{
   out.style.display="block";
   out.innerHTML = `<span class="ok">✔ 내보냈어요 — ${esc(a.download)}</span><br>도구 ${picked().length}개`
     + (rc ? " · 내 주소 포함(학생용)" : " · 내 주소 없음")
-    + (allowRc ? " · <b>받는 사람이 자기 시트 연결 가능</b>" : "");
+    + (allowRc ? " · <b>받는 사람이 자기 시트 연결 가능</b>" : "")
+    + (fix ? " · 🎓 <b>모두 같은 문제</b>" : "");
 };
 
 previewBtn.onclick = ()=>{
@@ -771,6 +785,7 @@ function buildShareUrl(){
     g: gid || undefined,               // exec 배포ID만 담아 주소 단축 (뷰어가 앞뒤 붙여 복원)
     r: (!gid && rc) ? rc : undefined,   // 형식이 exec 아니면 전체주소로 보존(호환)
     a: allowRc ? 1 : undefined,
+    f: document.getElementById("fixOrder").checked ? 1 : undefined,   // 수업용 모두 같은 문제
     // 간결형 배열: [emoji,name,repo,url,cat,type]  ← 순서 고정! (v1의 desc·전체 c 제거)
     l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", (t.sub?(t.cat+" · "+t.sub):(t.cat||"기타")), t.type||""])
   };
@@ -929,7 +944,7 @@ if (typeof HubLock === "undefined") {
   verFill();                      // 버전·점검 정보 채우기
 });
 
-/* 버전 표시 — 빌드 표식(lock.js?v=57a63e50)과 실제 도구 수를 그대로 읽어 쓴다.
+/* 버전 표시 — 빌드 표식(lock.js?v=216e35a7)과 실제 도구 수를 그대로 읽어 쓴다.
    숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
    함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
 function verFill(){
