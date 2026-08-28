@@ -299,7 +299,7 @@
   </div>
 </div>
 
-<script src="lock.js?v=5116dd75"></script>
+<script src="lock.js?v=eb2533b4"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="text/plain" id="hubsrc">
@@ -314,6 +314,7 @@ const AREAS = [
   /* 제도는 도구가 많아 교과서 흐름대로 4칸으로 나눔 (허브의 3단계와 같은 순서) */
   ["📐 제도 · 도면", ["제도 ⓪ 모아보기", "제도 ① 기초 — 양식 · 선 · 치수",
                     "제도 ② 도법 — 작도 · 투상 · 단면 · 전개", "제도 ③ 기호 · 재료 · 용접"], "전공"],
+  ["🏭 공업 일반 (공통 교과)", ["공업 일반"], "전공"],
   ["⚙️ 기계 · 설비", ["자동화설비기능사", "반도체설비보전기능사", "공조냉동 · 에너지제어", "3D프린터운용기능사"], "전공"],
   ["🚁 항공 · 드론", ["드론 제작 (항공드론과)"], "전공"],
   ["🔩 금속 · 재료", ["열처리기능사", "금속재료시험기능사"], "전공"],
@@ -944,7 +945,7 @@ if (typeof HubLock === "undefined") {
   verFill();                      // 버전·점검 정보 채우기
 });
 
-/* 버전 표시 — 빌드 표식(lock.js?v=5116dd75)과 실제 도구 수를 그대로 읽어 쓴다.
+/* 버전 표시 — 빌드 표식(lock.js?v=eb2533b4)과 실제 도구 수를 그대로 읽어 쓴다.
    숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
    함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
 function verFill(){
