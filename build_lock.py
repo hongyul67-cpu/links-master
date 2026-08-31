@@ -45,9 +45,47 @@ def eval_tools():
         os.remove(tmp)
 
 
+
+def read_deployed(pw):
+    """지금 올라가 있는 tools.enc 를 같은 교사용 암호로 풀어 도구 이름을 돌려준다.
+
+    tools.js 는 .gitignore 라 내 PC에만 있다. 다른 기기/세션에서 추가한 카드는
+    tools.enc 에만 들어 있어서, 낡은 tools.js 로 그냥 다시 빌드하면 그 카드가
+    조용히 사라진다(2026-08-25 에 실제로 2장이 사라질 뻔했다).
+    그래서 빌드 전에 지금 파일을 풀어 이름을 맞춰 본다.
+    """
+    fp = os.path.join(HERE, "tools.enc")
+    if not os.path.exists(fp):
+        return None
+    try:
+        enc = json.loads(io.open(fp, encoding="utf-8").read())
+        salt = base64.b64decode(enc["kdf"]["salt"])
+        it = enc["kdf"].get("iter", ITER)
+        key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32,
+                         salt=salt, iterations=it).derive(pw.encode("utf-8"))
+        ck = None
+        for k in enc["keys"]:                      # 어느 것이 교사용인지 감춰 뒀으니 다 해 본다
+            try:
+                info = json.loads(AESGCM(key).decrypt(
+                    base64.b64decode(k["iv"]), base64.b64decode(k["blob"]), None))
+                ck = base64.b64decode(info["ck"]); break
+            except Exception:
+                continue
+        if ck is None:
+            return None                            # 암호가 다르거나 형식이 바뀐 경우
+        body = base64.b64decode(enc["data"])
+        gz = AESGCM(ck).decrypt(body[:12], body[12:], None)
+        old = json.loads(gzip.decompress(gz).decode("utf-8"))
+        return [t.get("name") for t in old]
+    except Exception:
+        return None
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--pw", required=True, help="교사용 암호 (만료 없음)")
+    ap.add_argument("--allow-remove", action="store_true",
+                    help="지금 올라간 목록에서 카드가 빠지는 것을 알고도 진행")
     a = ap.parse_args()
 
     cfg = weekly.load()
@@ -56,6 +94,30 @@ def main():
 
     payload = eval_tools()
     tools = json.loads(payload)
+
+    # 낡은 tools.js 로 덮어써서 남의 카드를 지우는 사고를 막는다
+    old_names = read_deployed(a.pw)
+    if old_names is None:
+        print("  ⚠ 지금 올라간 tools.enc 를 풀어 보지 못했습니다 — 목록 비교를 건너뜁니다.")
+    else:
+        new_names = [t.get("name") for t in tools]
+        lost = [n for n in old_names if n not in set(new_names)]
+        added = [n for n in new_names if n not in set(old_names)]
+        print("  지금 올라간 목록 %d개 · 새로 올릴 목록 %d개" % (len(old_names), len(new_names)))
+        for n in added:
+            print("    + %s" % n)
+        if lost:
+            print("")
+            print("  ⛔ 아래 %d개가 이 빌드에서 사라집니다:" % len(lost))
+            for n in lost:
+                print("    - %s" % n)
+            if not a.allow_remove:
+                raise SystemExit(
+                    "\n  내 tools.js 가 배포본보다 뒤처져 있을 수 있습니다.\n"
+                    "  먼저 위 카드를 tools.js 에 되살리세요.\n"
+                    "  정말로 빼려는 것이면 --allow-remove 를 붙이세요.")
+            print("  --allow-remove 가 있어 그대로 진행합니다.")
+
     raw = payload.encode("utf-8")
     gz = gzip.compress(raw, 9)
 
