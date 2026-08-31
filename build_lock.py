@@ -83,12 +83,19 @@ def read_deployed(pw):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--pw", required=True, help="교사용 암호 (만료 없음)")
+    ap.add_argument("--pw", help="교사용 암호 (만료 없음). 생략하면 _weekly/secret.json 의 teacher_pw 를 쓴다")
     ap.add_argument("--allow-remove", action="store_true",
                     help="지금 올라간 목록에서 카드가 빠지는 것을 알고도 진행")
     a = ap.parse_args()
 
     cfg = weekly.load()
+    # 교사용 암호도 주간 코드와 같은 공용 설정에서 가져온다.
+    # 손으로 넣지 않아도 되고, 도구 넷이 같은 암호를 쓰게 되어 어긋날 일이 없다.
+    # (--pw 를 주면 그쪽이 우선 — 암호를 바꿀 때만 쓴다)
+    if not a.pw:
+        a.pw = cfg.get("teacher_pw")
+        if not a.pw:
+            raise SystemExit("교사용 암호가 없습니다 - --pw 로 주거나 _weekly/secret.json 에 teacher_pw 를 넣으세요")
     start = date.fromisoformat(cfg["epoch"])
     nweeks = cfg["weeks"]
 
