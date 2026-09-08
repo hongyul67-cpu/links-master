@@ -299,7 +299,7 @@
   </div>
 </div>
 
-<script src="lock.js?v=747e9954"></script>
+<script src="lock.js?v=6f4e47c3"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="text/plain" id="hubsrc">
@@ -342,6 +342,9 @@ let TOOLS = window.HUB_TOOLS || [];   /* tools.enc 에서 복호화된 목록 (�
 
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+/* 설명글만 <b>…</b> 를 살려서 보여 준다. 나머지 태그는 그대로 글자로 남는다.
+   (그동안 설명에 적어 둔 <b> 가 화면에 태그 글자 그대로 나오고 있었다) */
+function escDesc(s){ return esc(s).replace(/&lt;(\/?)b&gt;/g, "<$1b>"); }
 /* 도구가 실제로 열리는 주소 (url 이 있으면 그걸, 없으면 GitHub Pages repo 주소) */
 function toolUrl(t){ return t.url || ("https://" + GH_USER + ".github.io/" + t.repo + "/"); }
 
@@ -363,7 +366,7 @@ function itemHTML(o){
       <input type="checkbox" data-i="${o.i}" title="공유 목록에 담기">
       <span class="cbody">
         <a class="nm" href="${esc(toolUrl(t))}" target="_blank" rel="noopener" title="프로그램 열기">${esc(t.emoji||"🔗")} ${esc(t.name)}</a>
-        ${t.desc?`<span class="cdesc">${esc(t.desc)}</span>`:""}
+        ${t.desc?`<span class="cdesc">${escDesc(t.desc)}</span>`:""}
         <span class="cmeta">${dist}${cr}${pv}${tag}${rc}${cm}</span>
         <span class="cacts">
           <button type="button" data-copy="${esc(toolUrl(t))}" title="이 도구 주소만 복사">📋 복사</button>
@@ -659,6 +662,7 @@ const TYPE_CLASS={"게임":"t-game","개념":"t-concept","문제풀이":"t-quiz"
 const TOOLS=${JSON.stringify(data)};
 const LSK="rc_endpoint_v1";
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function escDesc(s){return esc(s).replace(/&lt;(\/?)b&gt;/g,"<$1b>");}
 function rank(t){return (t.type&&t.type in TYPE_ORDER)?TYPE_ORDER[t.type]:99;}
 function ordr(t){return (typeof t.ord==="number")?t.ord:9999;}
 function myRc(){try{return localStorage.getItem(LSK)||"";}catch(e){return "";}}
@@ -680,7 +684,7 @@ function render(){
     var det=document.createElement("details");det.className="section";det.open=true;
     var cards=items.map(function(t){
       var tag=t.type?'<span class="tag '+(TYPE_CLASS[t.type]||"")+'">'+esc(t.type)+'</span>':"";
-      return '<a class="card" href="'+esc(linkOf(t))+'"><p class="name"><span class="emoji">'+esc(t.emoji||"🔗")+'</span>'+esc(t.name)+'</p><p class="desc">'+esc(t.desc||"")+'</p><div class="meta">'+tag+'</div></a>';
+      return '<a class="card" href="'+esc(linkOf(t))+'"><p class="name"><span class="emoji">'+esc(t.emoji||"🔗")+'</span>'+esc(t.name)+'</p><p class="desc">'+escDesc(t.desc||"")+'</p><div class="meta">'+tag+'</div></a>';
     }).join("");
     det.innerHTML='<summary class="cat"><span class="chev">▸</span>'+esc(cat)+'<span class="count">'+items.length+'</span></summary><div class="grid">'+cards+'</div>';
     app.appendChild(det);
@@ -949,7 +953,7 @@ if (typeof HubLock === "undefined") {
   verFill();                      // 버전·점검 정보 채우기
 });
 
-/* 버전 표시 — 빌드 표식(lock.js?v=747e9954)과 실제 도구 수를 그대로 읽어 쓴다.
+/* 버전 표시 — 빌드 표식(lock.js?v=6f4e47c3)과 실제 도구 수를 그대로 읽어 쓴다.
    숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
    함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
 function verFill(){
