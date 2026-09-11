@@ -18,7 +18,7 @@
 #
 # 주의: 평문 tools.js 는 .gitignore 에 있다. 절대 커밋하지 말 것.
 #       암호를 이 스크립트에 적어 두지 말 것 - 공개 저장소에 그대로 남는다.
-import io, os, re, json, gzip, base64, argparse, sys, subprocess, tempfile, secrets
+import io, os, re, json, gzip, base64, argparse, sys, subprocess, tempfile, secrets, hmac, hashlib
 from datetime import date
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
@@ -148,7 +148,11 @@ def main():
                 "blob": base64.b64encode(blob).decode()}
 
     ck_b64 = base64.b64encode(CK).decode()
-    keys = [wrap(a.pw, {"ck": ck_b64, "exp": None, "role": "teacher", "label": "교사용",
+    # 공유 키(sk) - [링크+QR]·[HTML 내보내기]로 나가는 도구 목록을 이 키로 암호화한다.
+    # 받은 사람은 교사용 암호나 그 주 코드로 여기 감싼 것을 풀어야 sk 를 얻는다.
+    # 시크릿에서 뽑으므로 다시 빌드해도 바뀌지 않는다 - 바뀌면 나눠 준 링크가 전부 안 열린다.
+    sk_b64 = base64.b64encode(hmac.new(MASTER, b"HONG-SHARE|v1", hashlib.sha256).digest()).decode()
+    keys = [wrap(a.pw, {"ck": ck_b64, "sk": sk_b64, "exp": None, "role": "teacher", "label": "교사용",
                         "ms": base64.b64encode(MASTER).decode(),
                         "epoch": start.isoformat(), "weeks": nweeks,
                         "prefix": cfg["prefix"]})]
@@ -156,7 +160,7 @@ def main():
     print("  키 감싸기 교사용 1개 + 학생용 %d주치 ..." % nweeks, end="", flush=True)
     sheet = weekly.weeks(cfg)
     for n, d0, d1, c in sheet:
-        keys.append(wrap(c, {"ck": ck_b64, "nbf": d0.isoformat(), "exp": d1.isoformat(),
+        keys.append(wrap(c, {"ck": ck_b64, "sk": sk_b64, "nbf": d0.isoformat(), "exp": d1.isoformat(),
                              "role": "student", "label": d0.isoformat()}))
     print(" 완료")
     secrets.SystemRandom().shuffle(keys)         # 어느 것이 교사용인지 감춘다

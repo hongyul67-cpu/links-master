@@ -29,6 +29,7 @@ window.HubLock = (function () {
   var ck = null;           // 내용키 — 데이터와 도판을 모두 이걸로 푼다
   var onOpen = null;
   var info = null;         // 열어 준 암호의 정보 (역할·기간)
+  var kit = null;          // 감싼 키 묶음 — 공유 파일에 그대로 넣어 받은 사람이 암호로 풀게 한다
 
   function b64(s) { var b = atob(s), u = new Uint8Array(b.length); for (var i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
   function b64s(u) { var s = ''; for (var i = 0; i < u.length; i++) s += String.fromCharCode(u[i]); return btoa(s); }
@@ -79,6 +80,7 @@ window.HubLock = (function () {
     if (!quiet) say('여는 중…', 'dim');
     return fetch('tools.enc', { cache: 'no-cache' }).then(function (r) { return r.json(); })
       .then(function (blob) {
+        kit = { kdf: { salt: blob.kdf.salt, iter: blob.kdf.iter }, keys: blob.keys };
         return derive(pw, b64(blob.kdf.salt), blob.kdf.iter)
           .then(function (kek) { return findKey(kek, blob.keys); })
           .then(checkPeriod)
@@ -329,6 +331,14 @@ window.HubLock = (function () {
     });
   }
 
-  return { mount: mount, open: open, forget: forget, codes: codes, panel: panel,
+  /* 공유 링크·내보내기 파일을 잠그는 데 쓴다.
+     sk 는 암호문 안에만 있으므로, 받은 사람도 교사용 암호나 그 주 코드를 넣어야 풀린다.
+     tools.enc 가 sk 를 넣기 전 빌드면 null — 그때는 build_lock.py 를 다시 돌린다. */
+  function shareKit() {
+    if (!info || !info.sk || !kit) return null;
+    return { sk: info.sk, kdf: kit.kdf, keys: kit.keys };
+  }
+
+  return { mount: mount, open: open, forget: forget, codes: codes, panel: panel, shareKit: shareKit,
            role: function () { return info && info.role; } };
 })();

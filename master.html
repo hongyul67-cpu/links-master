@@ -224,7 +224,7 @@
 
     <div class="way">
       <div class="wayttl">📱 링크 · QR <span class="rec">추천</span></div>
-      <p class="hint" style="margin:0 0 8px">주소 하나로 전달돼요. <b>학생은 QR만 스캔</b>하면 바로 열려요. (도구 목록이 주소 안에 담겨서 따로 배포 안 해도 됩니다)</p>
+      <p class="hint" style="margin:0 0 8px">주소 하나로 전달돼요. 학생은 QR을 스캔한 뒤 <b>이번 주 코드</b>를 넣으면 열려요. (도구 목록은 주소 안에 암호화돼 담깁니다 · 한 번 넣은 기기는 그 주 동안 바로 열림)</p>
       <button class="go" id="linkBtn" disabled>🔗 링크 + QR 만들기</button>
       <div class="out" id="linkOut"></div>
       <div id="qrBox" style="display:none;margin-top:12px;text-align:center">
@@ -252,7 +252,7 @@
 
     <div class="way">
       <div class="wayttl">📄 HTML 파일</div>
-      <p class="hint" style="margin:0 0 8px">파일 하나로 전달(카톡·메일 첨부). 인터넷 없이도 열려요.</p>
+      <p class="hint" style="margin:0 0 8px">파일 하나로 전달(카톡·메일 첨부). 인터넷 없이도 열려요. 받는 사람은 <b>이번 주 코드나 암호</b>를 넣어야 목록이 보입니다.</p>
       <button class="go alt" id="exportBtn" disabled>📄 공유용 HTML 파일로 내보내기</button>
       <button class="go alt" id="previewBtn" disabled>👀 미리보기 (새 탭)</button>
       <div class="out" id="out"></div>
@@ -299,7 +299,7 @@
   </div>
 </div>
 
-<script src="lock.js?v=966d23dc"></script>
+<script src="lock.js?v=ee6f4768"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="text/plain" id="hubsrc">
@@ -339,6 +339,100 @@ AREAS.forEach(function(a){ a[1].forEach(function(c){ CAT_AREA[c]=a[0]; CATEGORIE
 const TYPE_ORDER = { "게임":0, "개념":1, "문제풀이":2 };
 
 let TOOLS = window.HUB_TOOLS || [];   /* tools.enc 에서 복호화된 목록 (원본은 로컬 tools.js) */
+
+/* ══════════ 공유 잠금 (2026-09-11) ══════════
+   [링크+QR] 과 [HTML 내보내기] 로 나가는 도구 목록은 공유 키(sk)로 암호화한다.
+   sk 는 tools.enc 의 감싼 키 안에만 있어서, 받은 사람은 교사용 암호나 그 주 코드를
+   직접 넣어야 풀린다. 보낸 사람 기기에 암호가 기억돼 있어도 받은 사람 기기에는 없다.
+   · 아래 gB64 · gateTry · gateUnseal · gateMount 는 내보내기 파일에 글자 그대로 들어간다
+     (toString). 이 함수들 밖의 것을 쓰면 내보낸 파일에서 깨진다.
+   · links/s.html 에 같은 코드가 있다. 고치면 둘 다 고칠 것.
+   · 파일·링크에는 sk 를 절대 넣지 않는다 — 감싼 키 묶음(kdf·keys)만 넣는다. */
+function gB64(s){s=String(s).replace(/-/g,"+").replace(/_/g,"/");while(s.length%4)s+="=";var b=atob(s),u=new Uint8Array(b.length);for(var i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u;}
+function gateTry(pw,kit){
+  return crypto.subtle.importKey("raw",new TextEncoder().encode(pw),"PBKDF2",false,["deriveKey"]).then(function(base){
+    return crypto.subtle.deriveKey({name:"PBKDF2",salt:gB64(kit.kdf.salt),iterations:kit.kdf.iter,hash:"SHA-256"},base,{name:"AES-GCM",length:256},false,["decrypt"]);
+  }).then(function(kek){
+    var i=0;
+    function next(){
+      if(i>=kit.keys.length)return Promise.reject(new Error("BADPW"));
+      var k=kit.keys[i++];
+      return crypto.subtle.decrypt({name:"AES-GCM",iv:gB64(k.iv)},kek,gB64(k.blob)).then(function(p){return JSON.parse(new TextDecoder().decode(p));},next);
+    }
+    return next();
+  }).then(function(nfo){
+    var d=new Date(),t=d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2),e;
+    if(nfo.nbf&&t<nfo.nbf){e=new Error("NOTYET");e.when=nfo.nbf;throw e;}
+    if(nfo.exp&&t>=nfo.exp){e=new Error("EXPIRED");e.when=nfo.exp;throw e;}
+    if(!nfo.sk)throw new Error("BADPW");
+    return nfo.sk;
+  });
+}
+function gateUnseal(sk,sealed){
+  var u=gB64(sealed);
+  return crypto.subtle.importKey("raw",gB64(sk),{name:"AES-GCM"},false,["decrypt"]).then(function(k){
+    return crypto.subtle.decrypt({name:"AES-GCM",iv:u.slice(0,12)},k,u.slice(12));
+  }).then(function(b){return new Uint8Array(b);},function(){throw new Error("BADLINK");});
+}
+function gateMount(kit,sealed,host,onOpen){
+  var LS="share_pw_v1",opened=false;
+  var box=document.createElement("div");
+  box.innerHTML='<div style="max-width:420px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;text-align:center">'+
+    '<div style="font-size:40px;line-height:1">🔒</div>'+
+    '<h2 style="margin:10px 0 6px;font-size:19px">코드를 넣어 주세요</h2>'+
+    '<p style="margin:0 0 16px;color:var(--dim);font-size:13.5px">선생님께 받은 <b>이번 주 코드(8자리)</b>나 암호를 넣으면 열려요.</p>'+
+    '<input type="password" autocomplete="off" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:12px;font-size:17px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--tx);font-family:inherit">'+
+    '<button type="button" style="width:100%;margin-top:10px;padding:12px;font-size:15px;font-weight:800;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">열기</button>'+
+    '<div data-g="msg" style="margin-top:12px;min-height:18px;font-size:13px;color:var(--dim);line-height:1.5"></div>'+
+    '<p style="margin:14px 0 0;font-size:11.5px;color:var(--dim)">한 번 열면 이 기기에서는 다음부터 바로 들어갑니다.<br>주간 코드는 그 주에만 통합니다.</p></div>';
+  host.appendChild(box);
+  var inp=box.querySelector("input"),btn=box.querySelector("button"),msg=box.querySelector("[data-g=msg]");
+  function say(t,bad){msg.innerHTML=t;msg.style.color=bad?"#ef4444":"";}
+  function done(bytes){if(opened)return;opened=true;box.remove();onOpen(bytes);}
+  function tryPw(pw){return gateTry(pw,kit).then(function(sk){return gateUnseal(sk,sealed);});}
+  btn.onclick=function(){
+    var pw=inp.value.replace(/\s+/g,"");
+    if(!pw){inp.focus();return;}
+    btn.disabled=true;say("여는 중…");
+    tryPw(pw).then(function(b){try{localStorage.setItem(LS,pw);}catch(e){}done(b);},function(e){
+      var m=e&&e.message;btn.disabled=false;
+      say(m==="EXPIRED"?"사용 기간이 끝난 코드입니다 ("+e.when+"까지).<br>선생님께 이번 주 코드를 받으세요."
+        :m==="NOTYET"?"아직 쓸 수 없는 코드입니다.<br>"+e.when+"부터 쓸 수 있어요."
+        :m==="BADLINK"?"링크가 잘렸거나 손상됐어요.<br>전체 주소를 다시 받아 주세요."
+        :"코드나 암호가 맞지 않습니다.",true);
+      inp.value="";inp.focus();
+    });
+  };
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter")btn.click();});
+  /* 이 기기에 기억된 것만 조용히 시도한다 — 보낸 사람 기기에서만 바로 열리는 까닭.
+     share_pw_v1 = 이 잠금에서 넣은 것 · hub_pw_v1·hong_pw_v1 = 허브·도구에서 넣은 것 */
+  var tries=[];
+  try{["share_pw_v1","hub_pw_v1","hong_pw_v1"].forEach(function(k){var v=localStorage.getItem(k);
+    if(v&&tries.every(function(t){return t.v!==v;}))tries.push({k:k,v:v});});}catch(e){}
+  (function next(i){
+    if(opened)return;
+    if(i>=tries.length){say("");inp.focus();return;}
+    if(i===0)say("여는 중…");
+    tryPw(tries[i].v).then(done,function(){
+      if(tries[i].k===LS){try{localStorage.removeItem(LS);}catch(e){}}   // 지난주 코드 등
+      next(i+1);
+    });
+  })(0);
+}
+/* 보내는 쪽 — 바이트를 sk 로 봉해 주소에 넣을 수 있는 글자(base64url)로 */
+async function shareSeal(bytes){
+  const kit = HubLock.shareKit();
+  if(!kit) throw new Error("NOSK");
+  const key = await crypto.subtle.importKey("raw", gB64(kit.sk), {name:"AES-GCM"}, false, ["encrypt"]);
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ct = new Uint8Array(await crypto.subtle.encrypt({name:"AES-GCM", iv}, key, bytes));
+  const u = new Uint8Array(12 + ct.length); u.set(iv); u.set(ct, 12);
+  let s = ""; for(let i=0;i<u.length;i++) s += String.fromCharCode(u[i]);
+  return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+}
+/* 받는 쪽에 넣을 감싼 키 묶음 — sk 는 빼고 */
+function shareKitPublic(){ const k = HubLock.shareKit(); return k ? { kdf:k.kdf, keys:k.keys } : null; }
+const NOSK_MSG = "⚠️ 잠금용 공유 키가 없어요. tools.enc 가 예전 빌드입니다 — python build_lock.py 를 다시 돌려 주세요.";
 
 
 function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
@@ -596,8 +690,12 @@ document.getElementById("mcopy").onclick = function(){
 refresh();
 
 /* ── 공유용 HTML 생성 (고른 도구만 담긴 독립 파일) ── */
-function buildHTML(sel, title, rc, allowRc, fix){
+async function buildHTML(sel, title, rc, allowRc, fix){
   const data = sel.map(t => ({ emoji:t.emoji, name:t.name, desc:t.desc, repo:t.repo, url:t.url, cat:t.cat, type:t.type, ord:t.ord }));
+  /* 목록은 암호화해서 넣는다. 받은 사람이 코드·암호를 넣어야 풀린다 (인터넷 없이도) */
+  const kit = shareKitPublic();
+  if(!kit) throw new Error("NOSK");
+  const sealed = await shareSeal(new TextEncoder().encode(JSON.stringify(data)));
   const css = `:root{--bg:#0f1420;--card:#1a2130;--card2:#222c40;--line:#2c3852;--tx:#eef2fb;--dim:#9aa7c2;--accent:#5b8cff;--game:#38d39f;--concept:#5b8cff;--quiz:#f0a742}
 @media (prefers-color-scheme: light){:root{--bg:#f3f5fb;--card:#fff;--card2:#f7f9ff;--line:#e3e8f4;--tx:#1a2233;--dim:#5c6a86;--accent:#3565e6;--game:#12a97a;--concept:#3565e6;--quiz:#d98518}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:"Pretendard","Segoe UI",system-ui,sans-serif;line-height:1.5}
@@ -633,7 +731,7 @@ footer{margin-top:34px;color:var(--dim);font-size:12px;text-align:center}
 
   /* 받는 사람이 자기 시트를 연결하는 패널 (allowRc 일 때만 포함) */
   const rcBarHTML = allowRc ? `
-<div class="rcbar">
+<div class="rcbar" id="unlocked" hidden>
   <div class="rcnow">
     <span class="st" id="rcst"></span>
     <button id="rcopen">내 시트 연결</button>
@@ -659,10 +757,10 @@ const BAKED_FIX=${fix?"true":"false"};
 const CATEGORIES=${JSON.stringify(CATEGORIES)};
 const TYPE_ORDER=${JSON.stringify(TYPE_ORDER)};
 const TYPE_CLASS={"게임":"t-game","개념":"t-concept","문제풀이":"t-quiz"};
-const TOOLS=${JSON.stringify(data)};
+let TOOLS=[];   // 잠금이 풀리면 채운다
 const LSK="rc_endpoint_v1";
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
-function escDesc(s){return esc(s).replace(/&lt;(\/?)b&gt;/g,"<$1b>");}
+function escDesc(s){return esc(s).replace(/&lt;(\\/?)b&gt;/g,"<$1b>");}
 function rank(t){return (t.type&&t.type in TYPE_ORDER)?TYPE_ORDER[t.type]:99;}
 function ordr(t){return (typeof t.ord==="number")?t.ord:9999;}
 function myRc(){try{return localStorage.getItem(LSK)||"";}catch(e){return "";}}
@@ -690,9 +788,8 @@ function render(){
     app.appendChild(det);
   });
 }
-render();
 
-if(ALLOW_RC){
+function startRc(){ if(ALLOW_RC){
   var st=document.getElementById("rcst"), form=document.getElementById("rcform"),
       input=document.getElementById("rcinput"), errEl=document.getElementById("rcerr"),
       openBtn=document.getElementById("rcopen"), clearBtn=document.getElementById("rcclear");
@@ -713,7 +810,20 @@ if(ALLOW_RC){
   };
   clearBtn.onclick=function(){ try{ localStorage.removeItem(LSK); }catch(e){} paint(); };
   paint();
-}`;
+}}
+
+/* 잠금 — 코드·암호가 맞아야 목록이 풀린다 */
+${gB64}
+${gateTry}
+${gateUnseal}
+${gateMount}
+const SEALED=${JSON.stringify(sealed)};
+const KIT=${JSON.stringify(kit)};
+gateMount(KIT,SEALED,document.getElementById("gatehost"),function(b){
+  TOOLS=JSON.parse(new TextDecoder().decode(b));
+  var u=document.getElementById("unlocked"); if(u) u.hidden=false;
+  render(); startRc();
+});`;
 
   const subMsg = allowRc
     ? "아래 카드를 누르면 도구가 열려요 · 결과를 받으려면 먼저 [내 시트 연결]"
@@ -729,6 +839,7 @@ if(ALLOW_RC){
 <header><h1>${esc(title)}</h1>
 <div class="sub">${subMsg}</div></header>
 ${rcBarHTML}
+<div id="gatehost"></div>
 <div id="app"></div>
 <footer>${esc(title)}</footer>
 </div>
@@ -736,16 +847,19 @@ ${rcBarHTML}
 </body></html>`;
 }
 
-function currentHTML(){
+async function currentHTML(){
   const title = (document.getElementById("title").value||"학습 도구 모음").trim();
   const rc = document.getElementById("rc").value.trim();
   const allowRc = document.getElementById("allowRc").checked;
   const fix = document.getElementById("fixOrder").checked;
-  return { html: buildHTML(picked(), title, rc, allowRc, fix), title, rc, allowRc, fix };
+  return { html: await buildHTML(picked(), title, rc, allowRc, fix), title, rc, allowRc, fix };
 }
 
-exportBtn.onclick = ()=>{
-  const { html, title, rc, allowRc, fix } = currentHTML();
+exportBtn.onclick = async ()=>{
+  let r;
+  try{ r = await currentHTML(); }
+  catch(e){ const o=document.getElementById("out"); o.style.display="block"; o.textContent = e.message==="NOSK" ? NOSK_MSG : ("⚠️ 만들지 못했어요: "+e.message); return; }
+  const { html, title, rc, allowRc, fix } = r;
   const blob = new Blob([html], {type:"text/html;charset=utf-8"});
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -757,13 +871,25 @@ exportBtn.onclick = ()=>{
   out.innerHTML = `<span class="ok">✔ 내보냈어요 — ${esc(a.download)}</span><br>도구 ${picked().length}개`
     + (rc ? " · 내 주소 포함(학생용)" : " · 내 주소 없음")
     + (allowRc ? " · <b>받는 사람이 자기 시트 연결 가능</b>" : "")
-    + (fix ? " · 🎓 <b>모두 같은 문제</b>" : "");
+    + (fix ? " · 🎓 <b>모두 같은 문제</b>" : "")
+    + "<br>🔒 받는 사람은 <b>이번 주 코드나 암호</b>를 넣어야 열립니다";
 };
 
-previewBtn.onclick = ()=>{
-  const { html } = currentHTML();
-  const w = window.open("", "_blank");
-  w.document.write(html); w.document.close();
+previewBtn.onclick = async ()=>{
+  const w = window.open("", "_blank");        // 팝업 차단을 피하려고 창부터 연다
+  if(!w){
+    const o=document.getElementById("out"); o.style.display="block";
+    o.textContent = "⚠️ 새 창이 막혔어요. 브라우저 주소창 옆에서 팝업을 허용한 뒤 다시 눌러 주세요.";
+    return;
+  }
+  try{
+    const { html } = await currentHTML();
+    w.document.write(html); w.document.close();
+  }catch(e){
+    if(w) w.close();
+    const o=document.getElementById("out"); o.style.display="block";
+    o.textContent = e.message==="NOSK" ? NOSK_MSG : ("⚠️ 만들지 못했어요: "+e.message);
+  }
 };
 
 /* ══════════ 링크 + QR 만들기 ══════════
@@ -777,13 +903,17 @@ previewBtn.onclick = ()=>{
 
    ▷ v2 (2026-07): 주소·QR 단순화 — desc(설명)와 전체 c(카테고리목록)를 뺐습니다.
       v1 링크는 s.html·user.html 이 계속 처리하니 안 깨집니다.
+   ▷ 잠금 (2026-09-11): 새 링크는 ?d= 대신 ?e= 로 나갑니다.
+      안의 내용은 v2 그대로이고, LZ 로 줄인 바이트를 공유 키(sk)로 암호화했을 뿐입니다.
+      받은 사람은 s.html 에서 이번 주 코드나 교사용 암호를 넣어야 풀립니다.
+      예전 ?d= 링크는 그대로 바로 열립니다(이미 나눠 준 QR 을 깨지 않기로 함).
    ══════════════════════════════════════ */
 const SHARE_FMT = 2;   // 2 = 간결형(desc·전체 카테고리 제거). v1 은 뷰어가 계속 호환 처리.
 
 /* exec 전체주소에서 배포ID만 추출 (주소 단축용). 형식 안 맞으면 "" */
 function execId(u){ const m=/^https:\/\/script\.google\.com\/macros\/s\/(.+)\/exec$/.exec(u||""); return m?m[1]:""; }
 
-function buildShareUrl(){
+async function buildShareUrl(){
   const title = (document.getElementById("title").value||"학습 도구 모음").trim();
   const rc = document.getElementById("rc").value.trim();
   const allowRc = document.getElementById("allowRc").checked;
@@ -798,11 +928,13 @@ function buildShareUrl(){
     // 간결형 배열: [emoji,name,repo,url,cat,type]  ← 순서 고정! (v1의 desc·전체 c 제거)
     l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", (t.sub?(t.cat+" · "+t.sub):(t.cat||"기타")), t.type||""])
   };
-  const packed = LZString.compressToEncodedURIComponent(JSON.stringify(payload));
-  return VIEWER + "?d=" + packed;
+  const sealed = await shareSeal(LZString.compressToUint8Array(JSON.stringify(payload)));
+  return VIEWER + "?e=" + sealed;
 }
 
-document.getElementById("linkBtn").onclick = ()=>{
+let lastShareUrl = "";   // [링크 복사]는 화면에 나온 그 주소(=QR 과 같은 것)를 복사한다
+
+document.getElementById("linkBtn").onclick = async ()=>{
   const linkOut = document.getElementById("linkOut");
   const qrBox = document.getElementById("qrBox");
 
@@ -811,7 +943,14 @@ document.getElementById("linkBtn").onclick = ()=>{
     linkOut.textContent="⚠️ 압축 라이브러리를 못 불러왔어요. 인터넷 연결을 확인하세요.";
     return;
   }
-  const url = buildShareUrl();
+  let url;
+  try{ url = await buildShareUrl(); }
+  catch(e){
+    linkOut.style.display="block"; qrBox.style.display="none";
+    linkOut.textContent = e.message==="NOSK" ? NOSK_MSG : ("⚠️ 링크를 만들지 못했어요: "+e.message);
+    return;
+  }
+  lastShareUrl = url;
   linkOut.style.display="block";
   linkOut.textContent = url;
 
@@ -851,7 +990,8 @@ document.getElementById("linkBtn").onclick = ()=>{
                 : qver<=17 ? "QR 스캔 양호 👍"
                 : qver<=21 ? "QR 조금 촘촘 — 도구를 5개 이하로 줄이면 더 쉬워요"
                 :            "QR 꽤 촘촘 — 도구를 나눠 QR 2장으로 보내면 스캔이 훨씬 쉬워요";
-    linkOut.textContent = url + "\n\n도구 " + n + "개 · 주소 " + url.length + "자 · QR " + mod + "칸(v" + qver + ") · " + grade;
+    linkOut.textContent = url + "\n\n도구 " + n + "개 · 주소 " + url.length + "자 · QR " + mod + "칸(v" + qver + ") · " + grade
+      + "\n🔒 받는 사람은 이번 주 코드나 암호를 넣어야 열립니다";
   }catch(e){
     qrBox.style.display="block";
     box.innerHTML='<div style="color:#dc2626;font-size:12px;padding:20px">주소가 너무 길어 QR을 못 만들었어요.<br>도구 수를 줄여보세요.</div>';
@@ -859,8 +999,8 @@ document.getElementById("linkBtn").onclick = ()=>{
 };
 
 document.getElementById("copyLink").onclick = function(){
-  const url = buildShareUrl();
-  navigator.clipboard.writeText(url).then(()=>{
+  if(!lastShareUrl) return;
+  copyText(lastShareUrl, ()=>{
     this.textContent="복사됨 ✓";
     setTimeout(()=>{ this.textContent="링크 복사"; }, 1500);
   });
@@ -953,7 +1093,7 @@ if (typeof HubLock === "undefined") {
   verFill();                      // 버전·점검 정보 채우기
 });
 
-/* 버전 표시 — 빌드 표식(lock.js?v=966d23dc)과 실제 도구 수를 그대로 읽어 쓴다.
+/* 버전 표시 — 빌드 표식(lock.js?v=ee6f4768)과 실제 도구 수를 그대로 읽어 쓴다.
    숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
    함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
 function verFill(){
