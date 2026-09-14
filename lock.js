@@ -315,9 +315,23 @@ window.HubLock = (function () {
     })(0);
   }
 
-  function forget() {
-    try { localStorage.removeItem(LS_OWN); localStorage.removeItem(LS_SHARED); } catch (e) {}
+  /* 이 기기(이 브라우저)에 기억된 암호를 지운다 — 공용 PC 에서 쓰고 난 뒤, 암호를 바꾼 뒤.
+     허브 것(LS_OWN) · 도구 공용(LS_SHARED) · 잠긴 공유 링크에서 넣은 것(share_pw_v1) 을 모두 지운다.
+     도구들이 같은 주소(hongyul67-cpu.github.io)라 공용 키를 지우면 다른 잠긴 도구도 다시 묻는다 — 그래서 먼저 묻는다.
+     ask=false 면 묻지 않고 지운다. */
+  function forget(ask) {
+    if (ask !== false && !confirm(
+      '이 기기에 기억된 암호를 지울까요?\n\n' +
+      '· 이 허브를 다시 열 때 암호(또는 이번 주 코드)를 다시 넣어야 합니다.\n' +
+      '· 같은 브라우저의 다른 잠긴 도구(기출문제 등)도 다시 묻습니다.\n' +
+      '· 교사용 암호 자체가 바뀌는 것은 아닙니다.')) return false;
+    try {
+      localStorage.removeItem(LS_OWN);
+      localStorage.removeItem(LS_SHARED);
+      localStorage.removeItem('share_pw_v1');
+    } catch (e) {}
     location.reload();
+    return true;
   }
 
   /* 교사용으로 열려 있을 때 그 주 코드를 다시 보고 싶을 때 쓴다 */

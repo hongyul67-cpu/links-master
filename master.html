@@ -143,6 +143,9 @@
     padding:1px 9px;font-weight:700;color:var(--accent)}
   .verbox a{color:var(--accent);text-decoration:none;margin-left:auto}
   .verbox a:hover{text-decoration:underline}
+  .verbox button.pwreset{background:var(--card2);color:var(--tx);border:1px solid var(--line);border-radius:999px;
+    padding:4px 11px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
+  .verbox button.pwreset:hover{border-color:var(--warn);color:var(--warn)}
 /* 주간 학생 코드 카드 (페이지 맨 아래) — 허브 어두운 배경에 맞춘다 */
   .wkbox{max-width:960px;margin:22px auto 10px;padding:16px 18px;
     background:var(--card);border:1px solid var(--line);border-radius:13px}
@@ -284,6 +287,8 @@
     (분야 배치 · 내용 겹침 · 설명 숫자 확인)</span>
   <a href="https://github.com/hongyul67-cpu/links-master/blob/main/CHANGELOG.md"
      target="_blank" rel="noopener">변경 이력 보기 →</a>
+  <!-- 이 기기에 기억된 암호 지우기 — 공용 PC 에서 쓴 뒤 · 교사용 암호를 바꾼 뒤 -->
+  <button type="button" class="pwreset" id="pwreset" title="이 기기(브라우저)에 기억된 암호·코드를 지웁니다">🔑 기억된 암호 지우기</button>
 </div>
 
 <!-- 개별 도구 QR (수업 중 화면에 바로 띄우기) -->
@@ -299,7 +304,7 @@
   </div>
 </div>
 
-<script src="lock.js?v=3bf68f30"></script>
+<script src="lock.js?v=056a9a31"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
 <script type="text/plain" id="hubsrc">
@@ -1076,6 +1081,11 @@ document.getElementById("adminCopy").onclick = function(){
 <script>
 verFill();   // 빌드 표식은 잠금과 무관하니 열자마자 채운다
 
+/* 🔑 기억된 암호 지우기 — 지운 뒤 새로고침되어 잠금 화면이 다시 뜬다 */
+document.getElementById("pwreset").onclick = function(){
+  if (typeof HubLock !== "undefined") HubLock.forget();
+};
+
 /* 잠금이 풀리기 전에는 위 본체가 돌지 않는다(type="text/plain").
    암호가 맞으면 그때 진짜 script 로 바꿔 넣어 실행시킨다.
 
@@ -1093,7 +1103,7 @@ if (typeof HubLock === "undefined") {
   verFill();                      // 버전·점검 정보 채우기
 });
 
-/* 버전 표시 — 빌드 표식(lock.js?v=3bf68f30)과 실제 도구 수를 그대로 읽어 쓴다.
+/* 버전 표시 — 빌드 표식(lock.js?v=056a9a31)과 실제 도구 수를 그대로 읽어 쓴다.
    숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
    함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
 function verFill(){
