@@ -173,7 +173,7 @@
     <h2><span class="step">1</span>보낼 도구 고르기</h2>
     <div class="search">
       <span class="ico">🔎</span>
-      <input id="q" type="text" placeholder="도구 검색 (이름·설명·분야)">
+      <input id="q" type="text" placeholder="도구 검색 (이름·설명·분야)" aria-label="도구 검색">
       <button class="clr" id="qclr" title="지우기">✕</button>
     </div>
     <div class="dfilter" id="dfilter">
@@ -198,10 +198,10 @@
 
   <div class="panel">
     <h2><span class="step">2</span>공유용 설정</h2>
-    <label class="fld">제목 <span style="font-weight:400;color:var(--dim)">— 받는 사람이 볼 페이지 제목</span></label>
+    <label class="fld" for="title">제목 <span style="font-weight:400;color:var(--dim)">— 받는 사람이 볼 페이지 제목</span></label>
     <input id="title" type="text" value="학습 도구 모음">
 
-    <label class="fld">내 결과수집 주소 (선택)</label>
+    <label class="fld" for="rc">내 결과수집 주소 (선택)</label>
     <input id="rc" type="text" placeholder="https://script.google.com/macros/s/.../exec">
     <p class="hint">👩‍🎓 <b>학생에게 줄 때</b>: 넣으면 각 도구 링크에 자동으로 붙어 결과가 <b>내 시트</b>로 와요.<br>
        🧑‍🏫 <b>다른 선생님께 줄 때</b>: 비워두고 아래를 켜세요.</p>
@@ -305,16 +305,28 @@
 </div>
 
 <script src="lock.js?v=70101de7"></script>
-<script src="https://cdn.jsdelivr.net/npm/lz-string@1.5.0/libs/lz-string.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.js"></script>
+<!-- 남이 만든 라이브러리는 vendor/ 에 직접 담아 두고 여기서만 부릅니다.
+     예전에는 cdn.jsdelivr.net 에서 받아 썼는데, 학교 망이 막으면 QR이 안 만들어졌고
+     암호를 넣는 이 화면에서 남의 서버 코드가 같이 도는 것도 마음에 걸렸습니다.
+     자세한 내용과 새 버전으로 바꾸는 방법은 vendor/README.txt 에 있습니다. -->
+<script src="vendor/lz-string-1.5.0.min.js"></script>
+<script src="vendor/qrcode-generator-1.4.4.js"></script>
 <script type="text/plain" id="hubsrc">
 const GH_USER = "hongyul67-cpu";
 const VIEWER  = "https://hongyul67-cpu.github.io/links/s.html";   // 공유 모음 뷰어(공개 저장소)
 const ADMIN_VIEWER = "https://hongyul67-cpu.github.io/links/admin.html"; // 선생님 설정 페이지(links 저장소 = 학생용 안전 위치)
 
 /* 영역(대분류) → 그 아래 과목(중분류) 순서. 화면 카드·정렬·검색이 이 순서를 따릅니다.
-   과목이 1개뿐인 영역은 소제목 없이 영역 이름 아래 카드가 바로 나옵니다. */
-const AREAS = [
+   과목이 1개뿐인 영역은 소제목 없이 영역 이름 아래 카드가 바로 나옵니다.
+
+   ⚠️ 이 아래 목록은 잠금이 가려 주지 못합니다.
+      이 블록은 type="text/plain" 안에 평문으로 들어 있어서, 잠금 화면이 떠 있어도
+      소스 보기를 하면 과목 이름이 그대로 보입니다.
+      그래서 python build_lock.py 를 돌리면 이 목록을 areas.js(내 PC에만 둠)로 옮기고
+      tools.enc 안에 암호화해 넣은 뒤, 아래를 빈 [] 로 바꿔 놓습니다.
+      아래 AREAS-START ~ AREAS-END 표시는 그 스크립트가 찾는 자리입니다. 지우지 마세요. */
+/* AREAS-START */
+const AREAS = window.HUB_AREAS || [
   /* [분야 밴드 이름, 그 아래 과목들, (선택)그룹배지] — 전공은 분야별로 나눔 */
   /* 제도는 도구가 많아 교과서 흐름대로 4칸으로 나눔 (허브의 3단계와 같은 순서) */
   ["📐 제도 · 도면", ["제도 ⓪ 모아보기", "제도 ① 기초 — 양식 · 선 · 치수",
@@ -337,6 +349,7 @@ const AREAS = [
   ["🏫 학급 관리", ["학급 관리"]],
   ["🔒 내부 · 관리용 (공유하지 마세요)", ["내부 · 관리용 (공유하지 마세요)"]],
 ];
+/* AREAS-END */
 /* 과목→영역 역참조 + 평평한 카테고리 순서(내보내기·공유 파일이 이 순서로 그룹화) */
 const CAT_AREA = {};
 const CATEGORIES = [];
@@ -460,7 +473,9 @@ function shareKitPublic(){ const k = HubLock.shareKit(); return k ? { kdf:k.kdf,
 const NOSK_MSG = "⚠️ 잠금용 공유 키가 없어요. tools.enc 가 예전 빌드입니다 — python build_lock.py 를 다시 돌려 주세요.";
 
 
-function esc(s){ return String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+/* 작은따옴표도 함께 바꾼다. 지금은 속성을 전부 큰따옴표로 감싸고 있어 문제가 없지만,
+   나중에 한 군데라도 작은따옴표를 쓰면 그때 뚫린다. */
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 /* 설명글만 <b>…</b> 를 살려서 보여 준다. 나머지 태그는 그대로 글자로 남는다.
    (그동안 설명에 적어 둔 <b> 가 화면에 태그 글자 그대로 나오고 있었다) */
 function escDesc(s){ return esc(s).replace(/&lt;(\/?)b&gt;/g, "<$1b>"); }
@@ -525,12 +540,15 @@ function areaHTML(pair){
     <summary class="areahd"><span class="chev">▸</span>${esc(area)}${pill(group)}<span class="acount">0 / ${total}</span></summary>
     <div class="areabody">${used.map(c => shcatHTML(c, c)).join("")}</div></details>`;
 }
-/* 내부·관리용은 항상 맨 아래 · 미등록 분야(안전망)는 그 바로 앞에 */
-const INTERNAL = "내부 · 관리용 (공유하지 마세요)";
+/* 내부·관리용은 항상 맨 아래 · 미등록 분야(안전망)는 그 바로 앞에.
+   예전에는 분야 이름을 여기에 그대로 적어 두고 찾았는데, 그러면 이 파일에
+   과목 이름이 남아 잠금 화면에서도 소스 보기로 보였다.
+   목록의 맨 끝 분야를 내부용으로 약속하고 자리로만 가른다 (areas.js 주석 참고). */
+const LAST = Math.max(AREAS.length - 1, 0);
 listEl.innerHTML =
-    AREAS.filter(a => !a[1].includes(INTERNAL)).map(areaHTML).join("")
+    AREAS.slice(0, LAST).map(areaHTML).join("")
   + ORPHANS.map(c => soloHTML(c, c)).join("")
-  + AREAS.filter(a => a[1].includes(INTERNAL)).map(areaHTML).join("");
+  + AREAS.slice(LAST).map(areaHTML).join("");
 
 const boxes = [...listEl.querySelectorAll("input")];
 const countEl = document.getElementById("count");
@@ -769,7 +787,7 @@ footer{margin-top:34px;color:var(--dim);font-size:12px;text-align:center}
     <button class="ghost" id="rcclear" style="display:none">해제</button>
   </div>
   <div class="rcform" id="rcform">
-    <input id="rcinput" type="text" placeholder="https://script.google.com/macros/s/.../exec">
+    <input id="rcinput" type="text" aria-label="내 결과수집 주소" placeholder="https://script.google.com/macros/s/.../exec">
     <div class="frow">
       <button id="rcsave">저장</button>
       <button class="ghost" id="rccancel">취소</button>
@@ -791,7 +809,7 @@ const TYPE_CLASS={"게임":"t-game","개념":"t-concept","문제풀이":"t-quiz"
 /* 자작·공개 도구는 처음부터 들어 있고, 코드로 열리는 것만 나중에 더해진다 */
 let TOOLS=${JSON.stringify(freeData)};
 const LSK="rc_endpoint_v1";
-function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
 function escDesc(s){return esc(s).replace(/&lt;(\\/?)b&gt;/g,"<$1b>");}
 function rank(t){return (t.type&&t.type in TYPE_ORDER)?TYPE_ORDER[t.type]:99;}
 function ordr(t){return (typeof t.ord==="number")?t.ord:9999;}
@@ -1137,10 +1155,14 @@ document.getElementById("adminBtn").onclick = ()=>{
   }
 };
 
+/* 다른 복사 버튼과 똑같이 copyText 를 쓴다.
+   전에는 여기만 navigator.clipboard 를 직접 불렀는데, 그건 https 나 localhost 에서만
+   있어서 다른 데서는 눌러도 아무 일이 안 일어났다 (.catch 도 없어 조용히 실패했다). */
 document.getElementById("adminCopy").onclick = function(){
-  navigator.clipboard.writeText(buildAdminUrl()).then(()=>{
-    this.textContent="복사됨 ✓";
-    setTimeout(()=>{ this.textContent="링크 복사"; }, 1500);
+  const b = this;
+  copyText(buildAdminUrl(), ()=>{
+    b.textContent="복사됨 ✓";
+    setTimeout(()=>{ b.textContent="링크 복사"; }, 1500);
   });
 };
 </script>
@@ -1175,7 +1197,10 @@ if (typeof HubLock === "undefined") {
    함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
 function verFill(){
   try{
-    var m = /lock\.js\?v=([A-Za-z0-9]+)/.exec(document.documentElement.innerHTML);
+    /* 빌드 표식은 lock.js 를 부르는 그 태그에서 바로 읽는다.
+       전에는 페이지 전체(76KB)를 문자열로 만들어 정규식으로 훑었고, 그걸 두 번 했다. */
+    var el = document.querySelector('script[src*="lock.js"]');
+    var m = el && /[?&]v=([A-Za-z0-9]+)/.exec(el.getAttribute("src") || "");
     document.getElementById("vtag").textContent = "build " + (m ? m[1] : "—");
     var n = document.querySelectorAll("#list .item.card").length;
     document.getElementById("vcount").textContent = n ? n : "—";

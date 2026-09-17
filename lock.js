@@ -76,9 +76,43 @@ window.HubLock = (function () {
     return nfo;
   }
 
+  /* 암호를 물어 볼 것도 없이 이 환경에서는 아예 안 되는 경우를 먼저 가려낸다.
+     이걸 안 하면 무엇이 잘못됐든 화면에는 "암호가 맞지 않습니다" 만 떠서,
+     암호를 몇 번이고 다시 치게 된다. 실제로 file:// 로 열었을 때 그랬다. */
+  function blocker() {
+    if (location.protocol === 'file:') return {
+      t: '파일로 열면 목록을 못 읽어요',
+      m: '브라우저가 <b>file://</b> 에서는 목록 파일(tools.enc)을 읽지 못하게 막습니다.<br>' +
+         '암호 문제가 아니라 <b>여는 방법</b> 문제입니다.<br><br>' +
+         '· 인터넷 주소로 열면 그냥 됩니다<br><br>' +
+         '· 내 PC에서 보려면 이 폴더에서 아래를 실행한 뒤<br>' +
+         '<code style="display:block;margin:6px 0;padding:7px 10px;background:#241a44;' +
+         'border-radius:8px;color:#cfc4f0;font-size:13px">python -m http.server</code>' +
+         '&nbsp;&nbsp;<b>http://localhost:8000/master.html</b> 로 들어오세요'
+    };
+    if (!(window.crypto && crypto.subtle)) return {
+      t: '이 주소에서는 열 수 없어요',
+      m: '암호를 푸는 기능(crypto.subtle)이 이 환경에서 막혀 있습니다.<br>' +
+         '<b>https://</b> 주소나 <b>http://localhost</b> 로 들어와야 합니다.<br>' +
+         '(http:// 로 된 다른 PC 주소로 들어오면 브라우저가 막습니다)'
+    };
+    if (typeof DecompressionStream === 'undefined') return {
+      t: '이 브라우저에서는 열 수 없어요',
+      m: '목록의 압축을 푸는 기능이 이 브라우저에 없습니다.<br>' +
+         '<b>크롬이나 엣지를 최신으로 올린 뒤</b> 다시 열어 주세요.<br>' +
+         '(크롬·엣지 80, 사파리 16.4, 파이어폭스 113 이상)'
+    };
+    return null;
+  }
+
   function open(pw, quiet) {
     if (!quiet) say('여는 중…', 'dim');
-    return fetch('tools.enc', { cache: 'no-cache' }).then(function (r) { return r.json(); })
+    return fetch('tools.enc', { cache: 'no-cache' })
+      .catch(function () { throw new Error('NOFETCH'); })   // 망이 끊겼거나 주소가 막혔다
+      .then(function (r) {
+        if (!r.ok) { var e = new Error('NOFILE'); e.code = r.status; throw e; }
+        return r.json();
+      })
       .then(function (blob) {
         kit = { kdf: { salt: blob.kdf.salt, iter: blob.kdf.iter }, keys: blob.keys };
         return derive(pw, b64(blob.kdf.salt), blob.kdf.iter)
@@ -95,7 +129,19 @@ window.HubLock = (function () {
             return new Response(new Blob([gz]).stream().pipeThrough(ds)).text();
           })
           .then(function (txt) {
-            window.HUB_TOOLS = JSON.parse(txt);
+            /* 담긴 형태가 두 가지다.
+                 옛것  [ {도구}, {도구}, ... ]                 — 도구 목록만
+                 새것  { tools:[...], areas:[...] }            — 분야·과목 목록도 함께
+               분야 목록을 master.html 에 평문으로 두면 잠금 화면에서도 소스 보기로
+               과목 이름이 다 보여서, 그것도 tools.enc 안으로 옮겼다.
+               예전에 만든 tools.enc 로도 그대로 열려야 하므로 둘 다 받는다. */
+            var d = JSON.parse(txt);
+            if (Array.isArray(d)) {
+              window.HUB_TOOLS = d;
+            } else {
+              window.HUB_TOOLS = d.tools || [];
+              if (d.areas) window.HUB_AREAS = d.areas;
+            }
             try {
               localStorage.setItem(LS_OWN, pw);
               /* 만료되는 코드는 공용에 넣지 않는다 */
@@ -110,15 +156,25 @@ window.HubLock = (function () {
       })
       .catch(function (e) {
         ck = null; info = null;
-        try { localStorage.removeItem(LS_OWN); } catch (e2) {}   // 공용 키는 건드리지 않는다
+        var m = e && e.message;
+        /* 목록 파일을 못 받은 것은 암호 문제가 아니다 — 기억해 둔 암호를 지우면 안 된다.
+           지우면 망이 잠깐 끊긴 것만으로 다음에 또 암호를 물어보게 된다. */
+        var pwWrong = (m !== 'NOFETCH' && m !== 'NOFILE');
+        if (pwWrong) { try { localStorage.removeItem(LS_OWN); } catch (e2) {} }   // 공용 키는 건드리지 않는다
         if (!quiet) {
-          var m = e && e.message;
           if (m === 'EXPIRED') say('사용 기간이 끝난 코드입니다 (' + e.when + '까지).<br>선생님께 이번 주 코드를 받으세요.', 'bad');
           else if (m === 'NOTYET') say('아직 쓸 수 없는 코드입니다.<br>' + e.when + '부터 쓸 수 있어요.', 'bad');
+          else if (m === 'NOFETCH') say('목록 파일(tools.enc)을 받아오지 못했습니다.<br>' +
+                                        '<b>암호 문제가 아닙니다.</b> 인터넷 연결을 확인해 주세요.', 'bad');
+          else if (m === 'NOFILE') say('목록 파일(tools.enc)이 없습니다 (' + e.code + ').<br>' +
+                                       '<b>암호 문제가 아닙니다.</b> python build_lock.py 로 만든 뒤 올려 주세요.', 'bad');
           else say('암호가 맞지 않습니다.', 'bad');
           shake();
         } else { say('', 'dim'); }
-        var pwEl = $('gimPw'); if (pwEl) { pwEl.value = ''; pwEl.focus(); }
+        /* 암호가 틀렸을 때만 입력칸을 비운다. 파일을 못 받은 것이면 그대로 두어
+           연결을 고친 뒤 [열기] 만 다시 누르면 되게 한다. */
+        var pwEl = $('gimPw');
+        if (pwEl) { if (pwWrong) pwEl.value = ''; pwEl.focus(); }
         return false;
       });
   }
@@ -297,6 +353,18 @@ window.HubLock = (function () {
     var st = document.createElement('style'); st.textContent = CSS; document.head.appendChild(st);
     document.body.insertAdjacentHTML('beforeend', HTML);
     document.body.classList.add('locked');
+
+    /* 이 환경에서 아예 안 되는 경우라면 암호를 묻지 않는다.
+       입력칸을 그대로 두면 무엇이 문제인지 모른 채 암호만 다시 치게 된다. */
+    var bad = blocker();
+    if (bad) {
+      var box = $('gimBox');
+      box.innerHTML = '<div class="ico">⚠️</div><h1>' + bad.t + '</h1>' +
+                      '<p style="text-align:left;line-height:1.7">' + bad.m + '</p>' +
+                      '<div class="note">목록은 잠긴 채로 둡니다.</div>';
+      return;
+    }
+
     $('gimGo').onclick = function () { open($('gimPw').value.replace(/\s+/g, '')); };
     $('gimPw').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('gimGo').click(); });
 
