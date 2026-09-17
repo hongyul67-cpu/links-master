@@ -227,7 +227,7 @@
 
     <div class="way">
       <div class="wayttl">📱 링크 · QR <span class="rec">추천</span></div>
-      <p class="hint" style="margin:0 0 8px">주소 하나로 전달돼요. 학생은 QR을 스캔한 뒤 <b>이번 주 코드</b>를 넣으면 열려요. (도구 목록은 주소 안에 암호화돼 담깁니다 · 한 번 넣은 기기는 그 주 동안 바로 열림)</p>
+      <p class="hint" style="margin:0 0 8px">주소 하나로 전달돼요. <b>자작·공개 도구는 코드 없이</b> 스캔하면 바로 열립니다.<br>⚠️ 표시가 붙은 <b>교과서·기출 도구만</b> 목록 위에서 <b>이번 주 코드</b>를 넣어야 열려요. (한 번 넣은 기기는 그 주 동안 바로 열림)</p>
       <button class="go" id="linkBtn" disabled>🔗 링크 + QR 만들기</button>
       <div class="out" id="linkOut"></div>
       <div id="qrBox" style="display:none;margin-top:12px;text-align:center">
@@ -255,7 +255,7 @@
 
     <div class="way">
       <div class="wayttl">📄 HTML 파일</div>
-      <p class="hint" style="margin:0 0 8px">파일 하나로 전달(카톡·메일 첨부). 인터넷 없이도 열려요. 받는 사람은 <b>이번 주 코드나 암호</b>를 넣어야 목록이 보입니다.</p>
+      <p class="hint" style="margin:0 0 8px">파일 하나로 전달(카톡·메일 첨부). 인터넷 없이도 열려요. <b>자작·공개 도구는 코드 없이</b> 바로 보이고, ⚠️ 표시가 붙은 <b>교과서·기출 도구만</b> <b>코드나 암호</b>를 넣어야 보입니다.</p>
       <button class="go alt" id="exportBtn" disabled>📄 공유용 HTML 파일로 내보내기</button>
       <button class="go alt" id="previewBtn" disabled>👀 미리보기 (새 탭)</button>
       <div class="out" id="out"></div>
@@ -379,19 +379,39 @@ function gateUnseal(sk,sealed){
     return crypto.subtle.decrypt({name:"AES-GCM",iv:u.slice(0,12)},k,u.slice(12));
   }).then(function(b){return new Uint8Array(b);},function(){throw new Error("BADLINK");});
 }
-function gateMount(kit,sealed,host,onOpen){
+/* opts.compact = true 면 화면을 막지 않고 목록 위에 작은 줄로만 뜬다.
+   자작·공개 도구는 이미 보이는 상태이고, 코드가 필요한 것만 더 여는 경우다.
+   opts.count = 코드로 열리는 도구 수 (화면에 알려 주려고) */
+function gateMount(kit,sealed,host,onOpen,opts){
+  opts=opts||{};
   var LS="share_pw_v1",opened=false;
   var box=document.createElement("div");
-  box.innerHTML='<div style="max-width:420px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;text-align:center">'+
-    '<div style="font-size:40px;line-height:1">🔒</div>'+
-    '<h2 style="margin:10px 0 6px;font-size:19px">코드를 넣어 주세요</h2>'+
-    '<p style="margin:0 0 16px;color:var(--dim);font-size:13.5px">선생님께 받은 <b>이번 주 코드(8자리)</b>나 암호를 넣으면 열려요.</p>'+
-    '<input type="password" autocomplete="off" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:12px;font-size:17px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--tx);font-family:inherit">'+
-    '<button type="button" style="width:100%;margin-top:10px;padding:12px;font-size:15px;font-weight:800;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">열기</button>'+
-    '<div data-g="msg" style="margin-top:12px;min-height:18px;font-size:13px;color:var(--dim);line-height:1.5"></div>'+
-    '<p style="margin:14px 0 0;font-size:11.5px;color:var(--dim)">한 번 열면 이 기기에서는 다음부터 바로 들어갑니다.<br>주간 코드는 그 주에만 통합니다.</p></div>';
+  if(opts.compact){
+    box.innerHTML='<div style="background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:16px 0 4px">'+
+      '<div style="display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:13.5px">'+
+        '<span style="flex:1;min-width:190px">🔒 <b>코드가 있어야 열리는 자료'+(opts.count?' '+opts.count+'개':'')+'</b>가 더 있어요'+
+        '<br><span style="color:var(--dim);font-size:12.5px">교과서·기출처럼 그대로 못 내보내는 자료입니다. 나머지는 아래에 이미 열려 있어요.</span></span>'+
+        '<button type="button" data-g="show" style="background:var(--accent);color:#fff;border:0;border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">코드 넣기</button>'+
+      '</div>'+
+      '<div data-g="form" style="display:none;margin-top:10px">'+
+        '<input type="password" autocomplete="off" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:10px;font-size:15px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:8px;background:var(--card2);color:var(--tx);font-family:inherit">'+
+        '<button type="button" data-g="go" style="width:100%;margin-top:8px;padding:10px;font-size:14px;font-weight:800;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">열기</button>'+
+        '<div data-g="msg" style="margin-top:8px;min-height:16px;font-size:12.5px;color:var(--dim);line-height:1.5"></div>'+
+      '</div></div>';
+  } else {
+    box.innerHTML='<div style="max-width:420px;margin:30px auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:26px 22px;text-align:center">'+
+      '<div style="font-size:40px;line-height:1">🔒</div>'+
+      '<h2 style="margin:10px 0 6px;font-size:19px">코드를 넣어 주세요</h2>'+
+      '<p style="margin:0 0 16px;color:var(--dim);font-size:13.5px">선생님께 받은 <b>이번 주 코드(8자리)</b>나 암호를 넣으면 열려요.</p>'+
+      '<input type="password" autocomplete="off" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:12px;font-size:17px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--tx);font-family:inherit">'+
+      '<button type="button" data-g="go" style="width:100%;margin-top:10px;padding:12px;font-size:15px;font-weight:800;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">열기</button>'+
+      '<div data-g="msg" style="margin-top:12px;min-height:18px;font-size:13px;color:var(--dim);line-height:1.5"></div>'+
+      '<p style="margin:14px 0 0;font-size:11.5px;color:var(--dim)">한 번 열면 이 기기에서는 다음부터 바로 들어갑니다.<br>주간 코드는 그 주에만 통합니다.</p></div>';
+  }
   host.appendChild(box);
-  var inp=box.querySelector("input"),btn=box.querySelector("button"),msg=box.querySelector("[data-g=msg]");
+  var inp=box.querySelector("input"),btn=box.querySelector("[data-g=go]"),msg=box.querySelector("[data-g=msg]");
+  var showBtn=box.querySelector("[data-g=show]"),formEl=box.querySelector("[data-g=form]");
+  if(showBtn)showBtn.onclick=function(){formEl.style.display="block";showBtn.style.display="none";inp.focus();};
   function say(t,bad){msg.innerHTML=t;msg.style.color=bad?"#ef4444":"";}
   function done(bytes){if(opened)return;opened=true;box.remove();onOpen(bytes);}
   function tryPw(pw){return gateTry(pw,kit).then(function(sk){return gateUnseal(sk,sealed);});}
@@ -416,7 +436,7 @@ function gateMount(kit,sealed,host,onOpen){
     if(v&&tries.every(function(t){return t.v!==v;}))tries.push({k:k,v:v});});}catch(e){}
   (function next(i){
     if(opened)return;
-    if(i>=tries.length){say("");inp.focus();return;}
+    if(i>=tries.length){say("");if(!opts.compact)inp.focus();return;}
     if(i===0)say("여는 중…");
     tryPw(tries[i].v).then(done,function(){
       if(tries[i].k===LS){try{localStorage.removeItem(LS);}catch(e){}}   // 지난주 코드 등
@@ -696,11 +716,17 @@ refresh();
 
 /* ── 공유용 HTML 생성 (고른 도구만 담긴 독립 파일) ── */
 async function buildHTML(sel, title, rc, allowRc, fix){
-  const data = sel.map(t => ({ emoji:t.emoji, name:t.name, desc:t.desc, repo:t.repo, url:t.url, cat:t.cat, type:t.type, ord:t.ord }));
-  /* 목록은 암호화해서 넣는다. 받은 사람이 코드·암호를 넣어야 풀린다 (인터넷 없이도) */
-  const kit = shareKitPublic();
-  if(!kit) throw new Error("NOSK");
-  const sealed = await shareSeal(new TextEncoder().encode(JSON.stringify(data)));
+  const row = t => ({ emoji:t.emoji, name:t.name, desc:t.desc, repo:t.repo, url:t.url, cat:t.cat, type:t.type, ord:t.ord });
+  /* 자작·공개 도구는 파일 안에 그대로 넣어 코드 없이 열리게 하고,
+     교과서·기출(cr)이 든 것만 암호화해서 넣는다. 받은 사람이 코드·암호를 넣으면 더해진다. */
+  const freeData = sel.filter(t => !needsCode(t)).map(row);
+  const lockData = sel.filter(needsCode).map(row);
+  let kit = null, sealed = "";
+  if(lockData.length){
+    kit = shareKitPublic();
+    if(!kit) throw new Error("NOSK");
+    sealed = await shareSeal(new TextEncoder().encode(JSON.stringify(lockData)));
+  }
   const css = `:root{--bg:#0f1420;--card:#1a2130;--card2:#222c40;--line:#2c3852;--tx:#eef2fb;--dim:#9aa7c2;--accent:#5b8cff;--game:#38d39f;--concept:#5b8cff;--quiz:#f0a742}
 @media (prefers-color-scheme: light){:root{--bg:#f3f5fb;--card:#fff;--card2:#f7f9ff;--line:#e3e8f4;--tx:#1a2233;--dim:#5c6a86;--accent:#3565e6;--game:#12a97a;--concept:#3565e6;--quiz:#d98518}}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font-family:"Pretendard","Segoe UI",system-ui,sans-serif;line-height:1.5}
@@ -762,7 +788,8 @@ const BAKED_FIX=${fix?"true":"false"};
 const CATEGORIES=${JSON.stringify(CATEGORIES)};
 const TYPE_ORDER=${JSON.stringify(TYPE_ORDER)};
 const TYPE_CLASS={"게임":"t-game","개념":"t-concept","문제풀이":"t-quiz"};
-let TOOLS=[];   // 잠금이 풀리면 채운다
+/* 자작·공개 도구는 처음부터 들어 있고, 코드로 열리는 것만 나중에 더해진다 */
+let TOOLS=${JSON.stringify(freeData)};
 const LSK="rc_endpoint_v1";
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
 function escDesc(s){return esc(s).replace(/&lt;(\\/?)b&gt;/g,"<$1b>");}
@@ -817,7 +844,12 @@ function startRc(){ if(ALLOW_RC){
   paint();
 }}
 
-/* 잠금 — 코드·암호가 맞아야 목록이 풀린다 */
+/* 자작·공개 도구는 바로 보여 준다 */
+render();
+var u0=document.getElementById("unlocked"); if(u0) u0.hidden=false;
+startRc();
+
+${lockData.length ? `/* 교과서·기출이 든 것만 잠겨 있다 — 코드·암호가 맞으면 목록에 더해진다 */
 ${gB64}
 ${gateTry}
 ${gateUnseal}
@@ -825,10 +857,9 @@ ${gateMount}
 const SEALED=${JSON.stringify(sealed)};
 const KIT=${JSON.stringify(kit)};
 gateMount(KIT,SEALED,document.getElementById("gatehost"),function(b){
-  TOOLS=JSON.parse(new TextDecoder().decode(b));
-  var u=document.getElementById("unlocked"); if(u) u.hidden=false;
-  render(); startRc();
-});`;
+  JSON.parse(new TextDecoder().decode(b)).forEach(function(t){ TOOLS.push(t); });
+  render();
+}, { compact:true, count:${lockData.length} });` : `/* 전부 자작·공개 도구라 잠금이 없다 */`}`;
 
   const subMsg = allowRc
     ? "아래 카드를 누르면 도구가 열려요 · 결과를 받으려면 먼저 [내 시트 연결]"
@@ -873,11 +904,14 @@ exportBtn.onclick = async ()=>{
   setTimeout(()=>URL.revokeObjectURL(a.href), 3000);
   const out = document.getElementById("out");
   out.style.display="block";
+  const nLock = picked().filter(needsCode).length, nFree = picked().length - nLock;
   out.innerHTML = `<span class="ok">✔ 내보냈어요 — ${esc(a.download)}</span><br>도구 ${picked().length}개`
     + (rc ? " · 내 주소 포함(학생용)" : " · 내 주소 없음")
     + (allowRc ? " · <b>받는 사람이 자기 시트 연결 가능</b>" : "")
     + (fix ? " · 🎓 <b>모두 같은 문제</b>" : "")
-    + "<br>🔒 받는 사람은 <b>이번 주 코드나 암호</b>를 넣어야 열립니다";
+    + "<br>" + (!nFree ? "🔒 고른 게 전부 교과서·기출이라, 받는 사람은 <b>코드나 암호</b>를 넣어야 열립니다"
+              : !nLock ? "🔓 전부 자작·공개 도구입니다 — 받는 사람은 <b>코드 없이</b> 바로 열려요"
+              : `🔓 자작·공개 ${nFree}개는 코드 없이 바로 · 🔒 교과서·기출 ${nLock}개는 <b>코드</b>를 넣어야 열립니다`);
 };
 
 previewBtn.onclick = async ()=>{
@@ -912,29 +946,59 @@ previewBtn.onclick = async ()=>{
       안의 내용은 v2 그대로이고, LZ 로 줄인 바이트를 공유 키(sk)로 암호화했을 뿐입니다.
       받은 사람은 s.html 에서 이번 주 코드나 교사용 암호를 넣어야 풀립니다.
       예전 ?d= 링크는 그대로 바로 열립니다(이미 나눠 준 QR 을 깨지 않기로 함).
+   ▷ 꼭 필요할 때만 잠금 (2026-09-17): 위 방식은 자작 도구까지 코드를 물어 봤습니다.
+      이제 고른 도구를 둘로 나눕니다 — 기준은 cr(외부 기출·저작물 포함) 하나뿐입니다.
+        · cr 없음(자작·공개)  → ?d= 에 그대로. 코드 없이 바로 열림
+        · cr 있음(교과서·기출) → ?e= 에 암호화. 목록 위 작은 줄에서 코드를 넣으면 더해짐
+      둘이 섞이면 ?d=…&e=… 로 나가고, 고른 게 전부 저작물이면 예전처럼 ?e= 만 나갑니다.
+      k = 코드로 열리는 도구 수 (화면에 "N개가 더 있어요" 라고 알려 주려고 · 맨 뒤에 붙임)
    ══════════════════════════════════════ */
 const SHARE_FMT = 2;   // 2 = 간결형(desc·전체 카테고리 제거). v1 은 뷰어가 계속 호환 처리.
 
 /* exec 전체주소에서 배포ID만 추출 (주소 단축용). 형식 안 맞으면 "" */
 function execId(u){ const m=/^https:\/\/script\.google\.com\/macros\/s\/(.+)\/exec$/.exec(u||""); return m?m[1]:""; }
 
+/* 코드를 물어야 하는 도구인가 — 외부 기출·교과서 그림·스캔본이 든 것만.
+   자작 문항으로 만든 도구는 여기서 false 가 되어 코드 없이 열립니다.
+   (도구별 표시는 tools.js 의 cr 필드 · 카드에 ⚠️ 로 보입니다) */
+function needsCode(t){ return !!t.cr; }
+
+/* 간결형 배열: [emoji,name,repo,url,cat,type]  ← 순서 고정! (v1의 desc·전체 c 제거) */
+function shareRow(t){ return [t.emoji||"🔗", t.name, t.repo||"", t.url||"", (t.sub?(t.cat+" · "+t.sub):(t.cat||"기타")), t.type||""]; }
+
 async function buildShareUrl(){
   const title = (document.getElementById("title").value||"학습 도구 모음").trim();
   const rc = document.getElementById("rc").value.trim();
   const allowRc = document.getElementById("allowRc").checked;
   const gid = execId(rc);
-  const payload = {
+  const sel = picked();
+  const free = sel.filter(t => !needsCode(t));
+  const lock = sel.filter(needsCode);
+  const base = {
     v: SHARE_FMT,
     t: title,
     g: gid || undefined,               // exec 배포ID만 담아 주소 단축 (뷰어가 앞뒤 붙여 복원)
     r: (!gid && rc) ? rc : undefined,   // 형식이 exec 아니면 전체주소로 보존(호환)
     a: allowRc ? 1 : undefined,
-    f: document.getElementById("fixOrder").checked ? 1 : undefined,   // 수업용 모두 같은 문제
-    // 간결형 배열: [emoji,name,repo,url,cat,type]  ← 순서 고정! (v1의 desc·전체 c 제거)
-    l: picked().map(t => [t.emoji||"🔗", t.name, t.repo||"", t.url||"", (t.sub?(t.cat+" · "+t.sub):(t.cat||"기타")), t.type||""])
+    f: document.getElementById("fixOrder").checked ? 1 : undefined    // 수업용 모두 같은 문제
   };
-  const sealed = await shareSeal(LZString.compressToUint8Array(JSON.stringify(payload)));
-  return VIEWER + "?e=" + sealed;
+
+  /* 고른 게 전부 저작물 — 목록 자체를 감춘다(예전 방식 그대로) */
+  if(!free.length){
+    const sealed = await shareSeal(LZString.compressToUint8Array(JSON.stringify(
+      Object.assign({}, base, { l: lock.map(shareRow) }))));
+    return { url: VIEWER + "?e=" + sealed, free:0, lock:lock.length };
+  }
+
+  /* 자작·공개는 그대로(코드 없이 열림) · 저작물이 섞여 있으면 그것만 봉해서 뒤에 붙인다 */
+  const payload = Object.assign({}, base, { l: free.map(shareRow), k: lock.length || undefined });
+  let url = VIEWER + "?d=" + LZString.compressToEncodedURIComponent(JSON.stringify(payload));
+  if(lock.length){
+    const sealed = await shareSeal(LZString.compressToUint8Array(JSON.stringify(
+      { v: SHARE_FMT, l: lock.map(shareRow) })));
+    url += "&e=" + sealed;
+  }
+  return { url, free:free.length, lock:lock.length };
 }
 
 let lastShareUrl = "";   // [링크 복사]는 화면에 나온 그 주소(=QR 과 같은 것)를 복사한다
@@ -948,8 +1012,8 @@ document.getElementById("linkBtn").onclick = async ()=>{
     linkOut.textContent="⚠️ 압축 라이브러리를 못 불러왔어요. 인터넷 연결을 확인하세요.";
     return;
   }
-  let url;
-  try{ url = await buildShareUrl(); }
+  let url, nFree = 0, nLock = 0;
+  try{ const r = await buildShareUrl(); url = r.url; nFree = r.free; nLock = r.lock; }
   catch(e){
     linkOut.style.display="block"; qrBox.style.display="none";
     linkOut.textContent = e.message==="NOSK" ? NOSK_MSG : ("⚠️ 링크를 만들지 못했어요: "+e.message);
@@ -995,8 +1059,11 @@ document.getElementById("linkBtn").onclick = async ()=>{
                 : qver<=17 ? "QR 스캔 양호 👍"
                 : qver<=21 ? "QR 조금 촘촘 — 도구를 5개 이하로 줄이면 더 쉬워요"
                 :            "QR 꽤 촘촘 — 도구를 나눠 QR 2장으로 보내면 스캔이 훨씬 쉬워요";
+    const lockMsg = !nFree ? "🔒 고른 게 전부 교과서·기출이라, 받는 사람은 코드나 암호를 넣어야 열립니다"
+                  : !nLock ? "🔓 전부 자작·공개 도구입니다 — 받는 사람은 코드 없이 바로 열려요"
+                  : "🔓 자작·공개 " + nFree + "개는 코드 없이 바로 · 🔒 교과서·기출 " + nLock + "개는 코드를 넣어야 열립니다";
     linkOut.textContent = url + "\n\n도구 " + n + "개 · 주소 " + url.length + "자 · QR " + mod + "칸(v" + qver + ") · " + grade
-      + "\n🔒 받는 사람은 이번 주 코드나 암호를 넣어야 열립니다";
+      + "\n" + lockMsg;
   }catch(e){
     qrBox.style.display="block";
     box.innerHTML='<div style="color:#dc2626;font-size:12px;padding:20px">주소가 너무 길어 QR을 못 만들었어요.<br>도구 수를 줄여보세요.</div>';
