@@ -152,6 +152,18 @@ async function unlock(p, url, pw) {
   ok('틀린 암호는 막힘', (await bad.innerText('body')).includes('맞지 않습니다'));
   ok('틀린 암호로는 목록이 안 나옴', await bad.locator('.item.card').count() === 0);
 
+  // ── 잘못된 방법으로 열었을 때 (암호 탓으로 돌리지 않는지)
+  console.log('■ 파일로 열었을 때 — 원인을 제대로 알려 주는가');
+  const f = await (await b.newContext()).newPage();
+  await f.goto('file://' + path.join(HERE, 'master.html'));
+  await f.waitForTimeout(1200);
+  const ftxt = await f.locator('#gimBox').innerText().catch(() => '');
+  ok('"암호가 맞지 않습니다" 로 넘기지 않음', !ftxt.includes('암호가 맞지 않'));
+  ok('여는 방법을 알려 줌', ftxt.includes('http.server') || ftxt.includes('localhost'),
+     ftxt.split('\n').filter(Boolean)[1] || '(안내 없음)');
+  ok('암호를 묻지 않음', await f.locator('#gimPw').count() === 0);
+  ok('목록은 잠긴 채로 둠', await f.locator('.item.card').count() === 0);
+
   // ── 모바일
   console.log('■ 모바일 390px');
   const m = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
