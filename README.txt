@@ -64,25 +64,55 @@
     올라가는 것은 암호화본 tools.enc 뿐입니다.
 
   1) tools.js 에 카드 한 줄 추가
-  2) 새 과목이면 master.html 의 AREAS 에도 등록   ← 아래 ★ 꼭 읽으세요
-  3) python build_lock.py --pw hong2281          ← tools.enc 다시 만들기
-  4) git add -A ; git commit -m "..." ; git push
-  5) master.html 을 열어 그 도구가 제 분야 아래 보이는지 눈으로 확인
+  2) 새 과목이면 areas.js 에도 등록               ← 아래 ★ 꼭 읽으세요
+  3) python build_lock.py                        ← tools.enc 다시 만들기
+       암호를 칠 필요가 없습니다. _weekly/secret.json 의 teacher_pw 를 알아서 씁니다.
+       --pw 는 암호를 "바꿀 때"만 붙이세요.
+  4) node check_app.js <교사용 암호>              ← 브라우저로 실제 동작 확인 (있으면 좋음)
+  5) git add -A ; git commit -m "..." ; git push
+  6) master.html 을 열어 그 도구가 제 분야 아래 보이는지 눈으로 확인
 
-  ★ 새 과목(cat)을 쓸 때는 master.html 의 AREAS 에도 넣어야 합니다.
+  ★ 새 과목(cat)을 쓸 때는 areas.js 에도 넣어야 합니다.
     안 넣어도 오류가 안 납니다 — 대신 목록 맨 아래 "미분류" 자리에 조용히 떨어집니다.
     실제로 신재생에너지발전설비기능사가 그 상태로 한동안 있었습니다(2026-08-27 수정).
 
-    master.html 안 이 줄들을 찾아서, 맞는 분야의 [ ] 안에 과목 이름을 더하세요.
-      const AREAS = [
+    areas.js 안 이 줄들을 찾아서, 맞는 분야의 [ ] 안에 과목 이름을 더하세요.
+      module.exports = [
         ["⚡ 전기 · 신재생에너지", ["전기기능사", "신재생에너지발전설비기능사"], "전공"],
                  ↑ 분야 이름            ↑ 여기에 과목 이름을 넣습니다
     분야 자체가 새로 필요하면 줄을 하나 더 만들면 됩니다.
     (세 번째 "전공" 은 배지입니다. 전공 과목이 아니면 빼세요.)
 
+    ⚠️ 맨 끝 줄은 화면에서 항상 맨 아래로 내려갑니다 (내부·관리용 자리).
+      새 분야는 그 앞에 넣으세요. 맨 뒤에 붙이면 내부용이 위로 올라옵니다.
+
+  ※ areas.js 는 원래 master.html 안에 있던 목록입니다 (2026-09-17 에 옮겼습니다).
+    master.html 에 두면 잠금 화면이 떠 있어도 소스 보기로 과목 이름이 다 보였습니다.
+    지금은 tools.js 와 똑같이 .gitignore 에 있고, 암호화되어 tools.enc 안에 들어갑니다.
+    처음 python build_lock.py 를 돌릴 때 master.html 에서 자동으로 옮겨집니다 —
+    따로 만드실 것은 없습니다.
+
   ※ tools.enc 를 다시 만들어도 학생 주간 코드는 안 바뀝니다.
     코드는 _weekly/secret.json 에서 나오고 build_lock.py 가 그걸 새로 만들지 않습니다.
-    교사용 암호도 --pw 로 준 값 그대로입니다 (지금은 hong2281).
+    교사용 암호도 --pw 로 준 값 그대로 들어갑니다.
+
+  ⚠️ 암호는 이 파일에도, build_lock.py 에도, 커밋 글에도 적지 않습니다.
+    이 저장소는 public 이라 적는 순간 그대로 새 나갑니다.
+    암호가 있는 곳은 내 PC의 _weekly/secret.json 한 곳뿐입니다 (올라가지 않습니다).
+    --pw 로 직접 칠 때는 셸 기록에도 남으니, 쓰고 나서 history 를 지워 두면 더 좋습니다.
+
+■ 암호를 바꿀 때
+    1) _weekly/secret.json 의 teacher_pw 를 새 값으로 고칩니다
+    2) python build_lock.py            ← 고친 값을 그대로 씁니다
+    3) git add -A ; git commit -m "..." ; git push
+    4) master.html 을 열어 새 암호로 열리는지, 옛 암호로는 안 열리는지 둘 다 확인합니다
+
+  ※ 이미 나눠 준 공유 링크와 내보낸 파일은 예전 암호로 만들어졌습니다.
+    암호를 바꾸면 그것들은 새 암호로 안 열립니다. 다시 만들어 보내야 합니다.
+    학생 주간 코드는 시크릿에서 나오므로 그대로입니다 — 학생 쪽은 영향이 없습니다.
+
+  ※ 암호를 잊으면 되살릴 방법이 없습니다 (어디에도 안 적어 두니까요).
+    그때는 위 순서대로 새로 정하면 됩니다. tools.js 만 PC에 있으면 됩니다.
 
   한 줄 형식:
     { emoji:"🔧", name:"이름", desc:"설명",
@@ -97,16 +127,56 @@
     cm:true → "🎓수업모드" 배지
     cr:true → ⚠️ 외부 기출 포함 · pv:true → 🔒 개인정보 포함
 
-  ※ tools.js 를 잃어버렸다면 tools.enc 에서 되살릴 수 있습니다.
-    교사용 암호로 풀면 목록이 그대로 나옵니다 (build_lock.py 와 같은 방식).
+  ※ tools.js 와 areas.js 를 잃어버렸다면 tools.enc 에서 되살릴 수 있습니다.
+    교사용 암호로 풀면 둘 다 그대로 나옵니다 (build_lock.py 와 같은 방식).
+    ⚠️ 이 두 파일은 올라가지 않으니 내 PC에만 있습니다. PC가 고장나면 tools.enc 가
+      유일한 사본입니다. 되살리는 절차를 한 번은 실제로 해 보시길 권합니다.
+      (2026-08-25 에 낡은 tools.js 로 덮어써 카드 2장이 사라질 뻔한 적이 있습니다.
+       지금은 build_lock.py 가 빌드 전에 배포본과 견줘 보고 막아 줍니다.)
   (공개 허브 index.html 은 예전 그대로 살아있음 — 굳이 안 맞춰도 됩니다)
+
+■ 잠금이 가려 주는 것과 못 가리는 것
+  가려 줍니다 (tools.enc 안에 암호화되어 들어감)
+    · 도구 이름 · 설명 · 주소 · 배지          (tools.js)
+    · 분야와 과목 이름                        (areas.js · 2026-09-17 부터)
+
+  못 가립니다 (master.html · lock.js 를 받아 보면 그냥 보임)
+    · 화면 생김새와 기능, 잠금이 어떻게 도는지
+    · 공유 뷰어(s.html)와 선생님 설정(admin.html) 주소 — links 저장소가 public 이라 어차피 공개
+    · 저장소가 있다는 사실 자체
+
+  → 비밀로 해야 하는 것은 "목록"이지 "코드"가 아닙니다. 코드가 보여도 암호 없이는
+    목록이 안 풀립니다. 암호는 오직 _weekly/secret.json 에만 둡니다.
+
+■ 스스로 점검하기
+  python check_sync.py
+    master.html 과 links/s.html 의 잠금 코드가 아직 같은지 봅니다.
+    이 둘은 같은 내용이어야 합니다 — 내보내기 파일이 그 함수들을 그대로 퍼 담기 때문에
+    한쪽만 고치면 "내 화면에서는 되는데 받은 사람은 안 열리는" 일이 생깁니다.
+    build_lock.py 가 빌드할 때 자동으로 같이 돌립니다.
+    (links 저장소를 옆에 받아 두지 않았으면 조용히 건너뜁니다)
+
+  node check_app.js <교사용 암호>
+    진짜 브라우저로 열어 정상 · 잘못된 입력 · 다시 사용 세 가지를 확인합니다.
+    암호로 열림 · 카드가 그려짐 · 링크와 QR · 내보내기 · 틀린 암호 막힘 ·
+    새로고침 후 다시 열림 · 콘솔 오류 없음 · 바깥으로 나가는 요청 없음 ·
+    모바일 가로 스크롤 없음 · 잠긴 소스에 과목 이름이 새지 않음.
+    처음 한 번만:  npm install playwright  그리고  npx playwright install chromium
+    ※ 손으로 눌러 보던 것을 대신합니다. 고칠 때마다 한 번 돌려 보시면 좋습니다.
+
+■ vendor 폴더
+  남이 만든 라이브러리(lz-string · qrcode-generator)를 직접 담아 둔 곳입니다.
+  예전에는 cdn.jsdelivr.net 에서 받아 썼는데 학교 망이 막으면 QR이 안 만들어졌고,
+  암호를 넣는 화면에서 남의 서버 코드가 같이 도는 것도 마음에 걸려 옮겼습니다.
+  자세한 내용은 vendor/README.txt 를 보세요.
 
 ■ 수정 저장 / 다른 PC에서 받기
   저장소: https://github.com/hongyul67-cpu/links-master
   · 저장:  git add -A ; git commit -m "수정" ; git push
   · 받기:  git clone https://github.com/hongyul67-cpu/links-master.git
-  ※ 원본은 master.html 하나뿐입니다. (index.html 은 웹 주소 진입점 = 자동 이동용)
-     → master.html 만 고치고 push 하면 됩니다.
+  ※ 화면과 기능은 master.html 하나에 있습니다. (index.html 은 웹 주소 진입점 = 자동 이동용)
+     목록은 tools.js · areas.js 에 있고 둘 다 내 PC에만 있습니다.
+     새 PC에서 받으면 그 둘이 없으니, tools.enc 에서 되살린 뒤에 빌드하세요.
 
 ■ 기존 공개 허브
   https://hongyul67-cpu.github.io/links/  → 그대로 살아있습니다.

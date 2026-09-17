@@ -1,2 +1,10 @@
 # 도구 목록 원본 — 절대 커밋하지 말 것 (tools.enc 로 암호화해서만 배포)
 tools.js
+
+# 분야·과목 목록 원본 — master.html 에서 옮겨 온 것. 이것도 올리지 말 것
+# (올라가는 것은 암호화본 tools.enc 뿐입니다)
+areas.js
+
+# 파이썬이 만드는 찌꺼기
+__pycache__/
+*.pyc

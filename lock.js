@@ -95,7 +95,19 @@ window.HubLock = (function () {
             return new Response(new Blob([gz]).stream().pipeThrough(ds)).text();
           })
           .then(function (txt) {
-            window.HUB_TOOLS = JSON.parse(txt);
+            /* 담긴 형태가 두 가지다.
+                 옛것  [ {도구}, {도구}, ... ]                 — 도구 목록만
+                 새것  { tools:[...], areas:[...] }            — 분야·과목 목록도 함께
+               분야 목록을 master.html 에 평문으로 두면 잠금 화면에서도 소스 보기로
+               과목 이름이 다 보여서, 그것도 tools.enc 안으로 옮겼다.
+               예전에 만든 tools.enc 로도 그대로 열려야 하므로 둘 다 받는다. */
+            var d = JSON.parse(txt);
+            if (Array.isArray(d)) {
+              window.HUB_TOOLS = d;
+            } else {
+              window.HUB_TOOLS = d.tools || [];
+              if (d.areas) window.HUB_AREAS = d.areas;
+            }
             try {
               localStorage.setItem(LS_OWN, pw);
               /* 만료되는 코드는 공용에 넣지 않는다 */
