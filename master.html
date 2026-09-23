@@ -48,6 +48,9 @@
   .search{position:relative;margin-bottom:10px}
   .search input{width:100%;padding:10px 32px 10px 34px;border:1px solid var(--line);border-radius:9px;
     background:var(--card2);color:var(--tx);font-size:13.5px;font-family:inherit}
+  /* 암호 칸 — type=password 는 휴대폰에서 한글 조합이 꺼져 천지인이 안 된다. 보통 칸을 점으로만 가린다 */
+  .pwtext{-webkit-text-security:disc}
+  .pwtext:placeholder-shown{-webkit-text-security:none}
   .search input:focus{outline:none;border-color:var(--accent)}
   .search .ico{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:13px}
   .search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:0;
@@ -304,7 +307,7 @@
   </div>
 </div>
 
-<script src="lock.js?v=c13c00a1"></script>
+<script src="lock.js?v=bef6b496"></script>
 <!-- 남이 만든 라이브러리는 vendor/ 에 직접 담아 두고 여기서만 부릅니다.
      예전에는 cdn.jsdelivr.net 에서 받아 썼는데, 학교 망이 막으면 QR이 안 만들어졌고
      암호를 넣는 이 화면에서 남의 서버 코드가 같이 도는 것도 마음에 걸렸습니다.
@@ -385,7 +388,7 @@ function gateMount(kit,sealed,host,onOpen,opts){
         '<button type="button" data-g="show" style="background:var(--accent);color:#fff;border:0;border-radius:8px;padding:7px 12px;font-size:12.5px;font-weight:700;cursor:pointer;font-family:inherit">코드 넣기</button>'+
       '</div>'+
       '<div data-g="form" style="display:none;margin-top:10px">'+
-        '<input type="password" autocomplete="off" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:10px;font-size:15px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:8px;background:var(--card2);color:var(--tx);font-family:inherit">'+
+        '<input type="text" class="pwtext" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:10px;font-size:15px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:8px;background:var(--card2);color:var(--tx);font-family:inherit">'+
         '<button type="button" data-g="go" style="width:100%;margin-top:8px;padding:10px;font-size:14px;font-weight:800;border:0;border-radius:8px;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">열기</button>'+
         '<div data-g="msg" style="margin-top:8px;min-height:16px;font-size:12.5px;color:var(--dim);line-height:1.5"></div>'+
       '</div></div>';
@@ -394,7 +397,7 @@ function gateMount(kit,sealed,host,onOpen,opts){
       '<div style="font-size:40px;line-height:1">🔒</div>'+
       '<h2 style="margin:10px 0 6px;font-size:19px">코드를 넣어 주세요</h2>'+
       '<p style="margin:0 0 16px;color:var(--dim);font-size:13.5px">선생님께 받은 <b>이번 주 코드(8자리)</b>나 암호를 넣으면 열려요.</p>'+
-      '<input type="password" autocomplete="off" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:12px;font-size:17px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--tx);font-family:inherit">'+
+      '<input type="text" class="pwtext" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="이번 주 코드 또는 암호" style="width:100%;box-sizing:border-box;padding:12px;font-size:17px;text-align:center;letter-spacing:2px;border:1px solid var(--line);border-radius:10px;background:var(--card2);color:var(--tx);font-family:inherit">'+
       '<button type="button" data-g="go" style="width:100%;margin-top:10px;padding:12px;font-size:15px;font-weight:800;border:0;border-radius:10px;background:var(--accent);color:#fff;cursor:pointer;font-family:inherit">열기</button>'+
       '<div data-g="msg" style="margin-top:12px;min-height:18px;font-size:13px;color:var(--dim);line-height:1.5"></div>'+
       '<p style="margin:14px 0 0;font-size:11.5px;color:var(--dim)">한 번 열면 이 기기에서는 다음부터 바로 들어갑니다.<br>주간 코드는 그 주에만 통합니다.</p></div>';
@@ -407,7 +410,7 @@ function gateMount(kit,sealed,host,onOpen,opts){
   function done(bytes){if(opened)return;opened=true;box.remove();onOpen(bytes);}
   function tryPw(pw){return gateTry(pw,kit).then(function(sk){return gateUnseal(sk,sealed);});}
   btn.onclick=function(){
-    var pw=inp.value.replace(/\s+/g,"");
+    var pw=inp.value.replace(/\s+/g,"").normalize("NFC");
     if(!pw){inp.focus();return;}
     btn.disabled=true;say("여는 중…");
     tryPw(pw).then(function(b){try{localStorage.setItem(LS,pw);}catch(e){}done(b);},function(e){
@@ -419,7 +422,7 @@ function gateMount(kit,sealed,host,onOpen,opts){
       inp.value="";inp.focus();
     });
   };
-  inp.addEventListener("keydown",function(e){if(e.key==="Enter")btn.click();});
+  inp.addEventListener("keydown",function(e){if(e.key==="Enter"&&!e.isComposing&&e.keyCode!==229)btn.click();});
   /* 이 기기에 기억된 것만 조용히 시도한다 — 보낸 사람 기기에서만 바로 열리는 까닭.
      share_pw_v1 = 이 잠금에서 넣은 것 · hub_pw_v1·hong_pw_v1 = 허브·도구에서 넣은 것 */
   var tries=[];
@@ -1170,7 +1173,7 @@ if (typeof HubLock === "undefined") {
   verFill();                      // 버전·점검 정보 채우기
 });
 
-/* 버전 표시 — 빌드 표식(lock.js?v=c13c00a1)과 실제 도구 수를 그대로 읽어 쓴다.
+/* 버전 표시 — 빌드 표식(lock.js?v=bef6b496)과 실제 도구 수를 그대로 읽어 쓴다.
    숫자를 손으로 적어 두면 실제와 어긋나므로 화면에서 직접 센다.
    함수 선언이라 호이스팅되므로 위 mount 보다 늦게 적혀 있어도 된다. */
 function verFill(){

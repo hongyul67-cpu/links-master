@@ -310,6 +310,11 @@ window.HubLock = (function () {
     '#gimBox p.sub{margin:6px 0 18px}' +
     '#gimPw{width:100%;box-sizing:border-box;padding:14px 16px;font-size:17px;text-align:center;' +
     'letter-spacing:2px;border-radius:12px;border:1px solid #4a3878;background:#120c22;color:#efe9ff;outline:none}' +
+    /* 비밀번호 칸(type=password)은 휴대폰 키보드가 한글 조합을 끈다 — 천지인은 획을 모아
+       글자를 만드는 방식이라 아예 입력이 안 된다(쿼티는 되는 것처럼 보임). 그래서 보통 글자 칸에
+       점으로 가리기만 한다. */
+    '#gimPw{-webkit-text-security:disc;text-security:disc}' +
+    '#gimPw:placeholder-shown{-webkit-text-security:none}' +
     '#gimPw::placeholder{color:#5d5285;letter-spacing:0;font-size:13.5px}' +
     '#gimPw:focus{border-color:#8a6dff;box-shadow:0 0 0 3px rgba(138,109,255,.22)}' +
     '#gimGo,#gimGo2{width:100%;margin-top:12px;padding:14px;font-size:16px;font-weight:800;border:0;border-radius:12px;' +
@@ -340,7 +345,7 @@ window.HubLock = (function () {
     '<div class="ico">🔒</div>' +
     '<h1>학습도구 허브</h1>' +
     '<p>관리용 목록입니다.<br>암호나 이번 주 코드를 넣어 주세요.</p>' +
-    '<input id="gimPw" type="password" inputmode="text" autocomplete="current-password" placeholder="8자 · 이번 주 코드 또는 이름번호" aria-label="암호">' +
+    '<input id="gimPw" type="text" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="8자 · 이번 주 코드 또는 이름번호" aria-label="암호">' +
     '<button id="gimGo">열기</button>' +
     '<div id="gimMsg"></div>' +
     '<div class="note">학생 코드는 그 주 월요일부터 7일간 씁니다.<br>' +
@@ -365,8 +370,11 @@ window.HubLock = (function () {
       return;
     }
 
-    $('gimGo').onclick = function () { open($('gimPw').value.replace(/\s+/g, '')); };
-    $('gimPw').addEventListener('keydown', function (e) { if (e.key === 'Enter') $('gimGo').click(); });
+    /* NFC — 조합이 덜 끝난 자모(ㅎㅗㅇ)가 섞여 들어와도 완성형(홍)과 같은 암호로 본다 */
+    $('gimGo').onclick = function () { open($('gimPw').value.replace(/\s+/g, '').normalize('NFC')); };
+    $('gimPw').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' && !e.isComposing && e.keyCode !== 229) $('gimGo').click();
+    });
 
     /* 이 도구에서 쓰던 것 → 공용 것 순서로 조용히 시도한다.
        교사용으로 자동 해제될 때는 코드 화면을 띄우지 않고 바로 들어간다
